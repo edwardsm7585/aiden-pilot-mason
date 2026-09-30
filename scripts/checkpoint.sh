@@ -5,12 +5,14 @@ set -u
 LABEL=${1:?label required}; TS=$(date +%Y%m%d-%H%M%S)
 DIR=docs/evidence/checkpoints; mkdir -p "$DIR"
 CLI="npx @upstart13-com/aiden-cli"
+# Check before doctor writes its output file, which would itself dirty the tree.
+DIRTY=$(git status --porcelain)
 
 echo "== [$LABEL] aiden doctor"
 $CLI doctor 2>&1 | tee "$DIR/${TS}_${LABEL}_doctor.txt"; DOC=${PIPESTATUS[0]}
 
 echo "== [$LABEL] aiden upgrade --dry-run"
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$DIRTY" ]; then
   echo "SKIPPED: working tree dirty. Commit first, then re-run." | tee "$DIR/${TS}_${LABEL}_upgrade.txt"; UPG=2
 else
   $CLI upgrade --dry-run 2>&1 | tee "$DIR/${TS}_${LABEL}_upgrade.txt"; UPG=${PIPESTATUS[0]}
