@@ -56,6 +56,10 @@
     "tsx": "^4.21.0",
     "typescript": "^5"
   },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.5"
+  },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
   }
