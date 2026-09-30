@@ -262,9 +262,26 @@ Must be dated **before** the first UI commit.
 
 | Step | Date | Notes |
 |---|---|---|
-| `/frontend-design` invoked with the DeskLine brief | | |
-| Read `docs/design-system/00-overview.md` | | |
-| Read `01-foundations`, `02-components`, `03-forms`, `05-data-display`, `06-navigation`, `07-feedback`, `08-page-layouts` | | |
+| `/frontend-design` invoked with the DeskLine brief | 2026-09-30 | Brief pins Smithers DS, so its tokens and type win over the skill's defaults (e.g. DS-mandated small-caps section labels). Design plan below. |
+| Read `docs/design-system/00-overview.md` | 2026-09-30 | Golden rules: tokens only, radius scale, one primary CTA per view, complete empty states, skeleton-first, specific errors |
+| Read `01-foundations`, `02-components`, `03-forms`, `05-data-display`, `06-navigation`, `07-feedback`, `08-page-layouts` | 2026-09-30 | `Select` is not in aiden-ui → `npx shadcn add select`, themed; `PageHeader.title` is a string; aiden-ui ships `AuditLogTable`; nav icons by registry name |
+
+### Design plan (within Smithers DS)
+
+- **Color:** tokens only. Ticket status → Badge `info` (open) · `warning` (pending) · `secondary` (closed). Priority → `destructive` (urgent: the only solid red on screen) · `error` (high) · `warning` (medium) · `secondary` (low). Category and sentiment → `outline`. Violet is reserved for the single primary action per section.
+- **Type:** Inter for everything; JetBrains Mono only for machine values (request ids, model names); `tabular-nums` on money and token counts.
+- **Layout:**
+  ```
+  Tickets        [PageHeader: Tickets · org + role]
+                 [All | Open | Pending | Closed]          (status filter links)
+                 [ table: subject · status · priority · category · updated ][ New ticket card ]
+  Ticket detail  [PageHeader: subject · opened <date> by <owner> · ghost "All tickets"]
+                 [ Ticket card: body, triage, edit form ][ AI draft card ]
+  Admin          Members table (role select, saves on change) · Audit (aiden-ui AuditLogTable) · AI cost (3 metric cards + per-member + recent calls)
+  ```
+  Left-aligned throughout; two columns from `lg`, stacked below.
+- **The one expressive element:** the AI draft panel. The reply streams into a reading-width column (`max-w-prose`) with a violet caret that pulses while text arrives (static under `prefers-reduced-motion`), tone picked with the DS toggle-button pattern, and a quiet footer naming the model plus a Copy action once the draft is done. Everything else stays dense and quiet.
+- **Principles:** one primary per section; every list has a complete empty state; every mutation toasts; errors name the operation and the fix; viewers see read-only surfaces explained in text, not unexplained disabled buttons.
 
 ## AI safety
 
