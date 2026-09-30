@@ -1,0 +1,13 @@
+// DeskLine — tenant. Every Membership, Ticket and AIUsage row belongs to one Org.
+
+model Org {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  memberships Membership[]
+  tickets     Ticket[]
+  aiUsage     AIUsage[]
+
+  @@map("orgs")
+}

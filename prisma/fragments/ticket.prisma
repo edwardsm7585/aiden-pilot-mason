@@ -1,0 +1,24 @@
+// DeskLine — support ticket. `status`: open | pending | closed.
+// priority/category/sentiment are set by AI triage (src/lib/triage.ts).
+
+model Ticket {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  ownerId   String   @map("owner_id")
+  subject   String
+  body      String
+  status    String   @default("open")
+  priority  String?
+  category  String?
+  sentiment String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  org   Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  owner User @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([ownerId])
+  @@index([orgId, status])
+  @@map("tickets")
+}

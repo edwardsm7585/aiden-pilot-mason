@@ -16,5 +16,10 @@ model User {
   sessions Session[]
   roles    Role[]    @relation("UserRoles")
 
+  // DeskLine back-relations
+  memberships Membership[]
+  tickets     Ticket[]     @relation("TicketOwner")
+  aiUsage     AIUsage[]
+
   @@map("users")
 }

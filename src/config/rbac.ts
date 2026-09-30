@@ -28,6 +28,16 @@ export const ROLES = [
   },
 ] as const;
 
+/**
+ * DeskLine org roles, stored on `Membership.role` (one membership per user).
+ * Distinct from the global `ROLES` above, which gate the starter's
+ * `/admin/users` screens.
+ */
+export const ORG_ROLES = ["owner", "agent", "viewer"] as const;
+
+/** A DeskLine org role, e.g. `"agent"`. */
+export type OrgRole = (typeof ORG_ROLES)[number];
+
 /** A permission key, e.g. `"audit.read"`. */
 export type PermissionKey = (typeof PERMISSIONS)[number]["key"];
 

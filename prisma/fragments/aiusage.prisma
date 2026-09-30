@@ -1,0 +1,25 @@
+// DeskLine — one row per AI call, written by the usage sink (src/lib/ai-usage.ts).
+// Metadata only: never prompts or outputs. `requestId` joins to the
+// ai.draft / ai.classify AuditLog row for the same request.
+
+model AIUsage {
+  id               String   @id @default(cuid())
+  orgId            String   @map("org_id")
+  userId           String   @map("user_id")
+  requestId        String?  @map("request_id")
+  provider         String
+  model            String
+  promptTokens     Int      @map("prompt_tokens")
+  completionTokens Int      @map("completion_tokens")
+  costUsd          Decimal  @map("cost_usd") @db.Decimal(10, 6)
+  latencyMs        Int      @map("latency_ms")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("ai_usage")
+}

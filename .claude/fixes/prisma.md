@@ -38,3 +38,8 @@ dotenv.config({ path: ".env.local" });
 ```
 
 **Structurally prevented:** Yes — `prisma.config.ts` already updated with the correct pattern.
+
+- **[2026-09-30]** `npm run db:seed` → `⚠️ No seed command configured` (Prisma 7.10)
+  - **Root cause**: Prisma 7 ignores the `package.json` `"prisma": { "seed": ... }` field the starter ships; it reads `migrations.seed` from `prisma.config.ts`.
+  - **Fix**: `migrations: { path: "prisma/migrations", seed: "tsx prisma/seed.ts" }` in `prisma.config.ts`. `.env.local` is already loaded there via dotenv, so the seed inherits `DATABASE_URL`.
+  - **Prevention**: Raise upstream so the starter template ships the config-file seed.

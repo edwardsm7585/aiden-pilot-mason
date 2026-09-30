@@ -1,0 +1,17 @@
+// DeskLine — a user's role in an org. One membership per user (plan D2).
+// `role` is one of ORG_ROLES in src/config/rbac.ts: owner | agent | viewer.
+
+model Membership {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  userId    String   @map("user_id")
+  role      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([orgId])
+  @@map("memberships")
+}

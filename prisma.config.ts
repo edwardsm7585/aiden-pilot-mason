@@ -10,6 +10,7 @@ const url =
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
-  migrations: { path: "prisma/migrations" },
+  // Prisma 7 reads the seed command from here; package.json's "prisma.seed" is ignored.
+  migrations: { path: "prisma/migrations", seed: "tsx prisma/seed.ts" },
   datasource: { url },
 });
