@@ -13,6 +13,93 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── prisma\fragments\aiusage.prisma ───
+// DeskLine — one row per AI call, written by the usage sink (src/lib/ai-usage.ts).
+// Metadata only: never prompts or outputs. `requestId` joins to the
+// ai.draft / ai.classify AuditLog row for the same request.
+
+model AIUsage {
+  id               String   @id @default(cuid())
+  orgId            String   @map("org_id")
+  userId           String   @map("user_id")
+  requestId        String?  @map("request_id")
+  provider         String
+  model            String
+  promptTokens     Int      @map("prompt_tokens")
+  completionTokens Int      @map("completion_tokens")
+  costUsd          Decimal  @map("cost_usd") @db.Decimal(10, 6)
+  latencyMs        Int      @map("latency_ms")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("ai_usage")
+}
+
+// ─── prisma\fragments\membership.prisma ───
+// DeskLine — a user's role in an org. One membership per user (plan D2).
+// `role` is one of ORG_ROLES in src/config/rbac.ts: owner | agent | viewer.
+
+model Membership {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  userId    String   @map("user_id")
+  role      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([orgId])
+  @@map("memberships")
+}
+
+// ─── prisma\fragments\org.prisma ───
+// DeskLine — tenant. Every Membership, Ticket and AIUsage row belongs to one Org.
+
+model Org {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  memberships Membership[]
+  tickets     Ticket[]
+  aiUsage     AIUsage[]
+
+  @@map("orgs")
+}
+
+// ─── prisma\fragments\ticket.prisma ───
+// DeskLine — support ticket. `status`: open | pending | closed.
+// priority/category/sentiment are set by AI triage (src/lib/triage.ts).
+
+model Ticket {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  ownerId   String   @map("owner_id")
+  subject   String
+  body      String
+  status    String   @default("open")
+  priority  String?
+  category  String?
+  sentiment String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  org   Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  owner User @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([ownerId])
+  @@index([orgId, status])
+  @@map("tickets")
+}
+
 // ─── prisma\fragments\user.prisma ───
 // User model — owned by the consumer because Prisma requires it to
 // declare every back-relation it participates in. Add your business
@@ -31,6 +118,11 @@ model User {
   accounts Account[]
   sessions Session[]
   roles    Role[]    @relation("UserRoles")
+
+  // DeskLine back-relations
+  memberships Membership[]
+  tickets     Ticket[]     @relation("TicketOwner")
+  aiUsage     AIUsage[]
 
   @@map("users")
 }
