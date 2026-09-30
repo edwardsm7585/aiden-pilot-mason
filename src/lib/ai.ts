@@ -1,65 +1,49 @@
-/**
- * Lazy AI client factories — call `ai.openai()` etc. only when needed
- * so SDKs you don't have installed never fault. Toggle providers and
- * pin a default `model` per provider in aiden.config.ts, then install
- * the corresponding SDK.
- *
- * Each factory resolves its model from `aiden.config.ts`
- * (`ai.models[x]`). Pass an explicit `model` arg to override.
- */
-
-import { createAIClient, type AIClient } from "@upstart13-com/aiden-ai";
+import "server-only";
+import {
+  createAIClient,
+  type AIClient,
+  type AIProvider,
+} from "@upstart13-com/aiden-ai";
 import { aidenConfig } from "@/../aiden.config";
 
-const providerModels = aidenConfig.ai.models;
+/**
+ * The app's single AI client (plan D6). Provider and model come from
+ * `aiden.config.ts` → `ai.active` + `ai.models[active]`, so switching
+ * provider is a one-line config change with no edits here or in routes.
+ * Install the provider's SDK (optional peer of aiden-ai) before enabling it.
+ */
 
-export const ai = {
-  openai: (
-    model = providerModels.openai
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "openai",
-      model,
-      apiKey: process.env.OPENAI_API_KEY,
-    }),
-  anthropic: (
-    model = providerModels.anthropic
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "anthropic",
-      model,
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    }),
-  google: (
-    model = providerModels.google
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "google",
-      model,
-      apiKey: process.env.GOOGLE_API_KEY,
-    }),
-  mistral: (
-    model = providerModels.mistral
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "mistral",
-      model,
-      apiKey: process.env.MISTRAL_API_KEY,
-    }),
-  groq: (
-    model = providerModels.groq
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "groq",
-      model,
-      apiKey: process.env.GROQ_API_KEY,
-    }),
-  cohere: (
-    model = providerModels.cohere
-  ): Promise<AIClient> =>
-    createAIClient({
-      provider: "cohere",
-      model,
-      apiKey: process.env.COHERE_API_KEY,
-    }),
+const API_KEY_ENV: Record<AIProvider, string> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  google: "GOOGLE_API_KEY",
+  mistral: "MISTRAL_API_KEY",
+  groq: "GROQ_API_KEY",
+  cohere: "COHERE_API_KEY",
 };
+
+/** Thrown when the active provider is disabled (the AI kill-switch, plan §7). */
+export class AIUnavailableError extends Error {
+  constructor() {
+    super("AI unavailable");
+  }
+}
+
+let client: Promise<AIClient> | undefined;
+
+/** Lazily build (once) and return the configured AI client. */
+export function getAI(): Promise<AIClient> {
+  const provider = aidenConfig.ai.active;
+  if (!aidenConfig.ai.providers[provider]) {
+    return Promise.reject(new AIUnavailableError());
+  }
+  client ??= createAIClient({
+    provider,
+    model: aidenConfig.ai.models[provider],
+    apiKey: process.env[API_KEY_ENV[provider]],
+  }).catch((err: unknown) => {
+    client = undefined; // don't cache a failed build; retry on next call
+    throw err;
+  });
+  return client;
+}

@@ -32,6 +32,7 @@ type AidenConfigShape = {
   };
   ai: {
     providers: Record<AIProviderName, boolean>;
+    active: AIProviderName;
     models: Record<AIProviderName, string>;
   };
   audit: { enabled: boolean };
@@ -58,8 +59,8 @@ export const aidenConfig: AidenConfigShape = {
    * name/tagline/copyright at runtime (see src/config/brand.ts).
    */
   app: {
-    name: "Your App",
-    shortName: "your-app",
+    name: "DeskLine",
+    shortName: "deskline",
     tagline: "Your product tagline goes here.",
     description: "A short description of your app for metadata and previews.",
     supportEmail: "support@example.com",
@@ -81,16 +82,18 @@ export const aidenConfig: AidenConfigShape = {
     /** Toggle providers here; `aiden doctor` requires the matching API key env var. */
     providers: {
       openai: false,
-      anthropic: false,
+      anthropic: true,
       google: false,
       mistral: false,
       groq: false,
       cohere: false,
     },
-    /** Default model per provider, used by src/lib/ai.ts. */
+    /** The provider the app uses. Switching provider = changing this one line. */
+    active: "anthropic",
+    /** Model per provider, used by src/lib/ai.ts for the active provider. */
     models: {
       openai: "gpt-4o-mini",
-      anthropic: "claude-haiku-4-5",
+      anthropic: "claude-sonnet-4-6",
       google: "gemini-2.5-flash",
       mistral: "mistral-small-latest",
       groq: "llama-3.3-70b-versatile",

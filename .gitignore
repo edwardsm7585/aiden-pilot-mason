@@ -49,3 +49,6 @@ yarn-error.log*
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# DeskLine jsonl audit sink (AUDIT_SINK=jsonl)
+.audit/
