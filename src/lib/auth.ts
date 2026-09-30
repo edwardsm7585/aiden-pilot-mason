@@ -7,6 +7,10 @@ import {
 } from "@upstart13-com/aiden-auth";
 import { prisma } from "@/lib/prisma";
 import { aidenConfig } from "@/../aiden.config";
+// Register the audit sink in the route module graph. instrumentation.ts
+// alone isn't enough: Next bundles it separately, so routes get their own
+// aiden-security instance and would fall back to the log-only sink.
+import "@/lib/audit";
 
 const providers = [];
 

@@ -5,6 +5,9 @@ import {
   type AIProvider,
 } from "@upstart13-com/aiden-ai";
 import { aidenConfig } from "@/../aiden.config";
+// Register the AIUsage sink in the same module graph as the AI calls (see
+// the note in src/lib/auth.ts on why instrumentation.ts alone isn't enough).
+import "@/lib/ai-usage";
 
 /**
  * The app's single AI client (plan D6). Provider and model come from
