@@ -13,7 +13,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── prisma/fragments/user.prisma ───
+// ─── prisma\fragments\user.prisma ───
 // User model — owned by the consumer because Prisma requires it to
 // declare every back-relation it participates in. Add your business
 // back-refs here (e.g. `posts Post[]`, `org Org @relation(...)`).
@@ -35,7 +35,7 @@ model User {
   @@map("users")
 }
 
-// ─── /Users/ramon.marrero/aide-sdk-cli/packages/aiden-db/schema/audit.prisma ───
+// ─── node_modules\@upstart13-com\aiden-db\schema\audit.prisma ───
 // AIDEN — Audit log table.
 //
 // Composed into the consumer's `prisma/schema.prisma` via
@@ -66,7 +66,7 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-// ─── /Users/ramon.marrero/aide-sdk-cli/packages/aiden-db/schema/auth.prisma ───
+// ─── node_modules\@upstart13-com\aiden-db\schema\auth.prisma ───
 // AIDEN — NextAuth core tables
 //
 // Composed into the consumer's `prisma/schema.prisma` via `aiden-db-merge-schema`.
@@ -122,7 +122,7 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ─── /Users/ramon.marrero/aide-sdk-cli/packages/aiden-db/schema/rbac.prisma ───
+// ─── node_modules\@upstart13-com\aiden-db\schema\rbac.prisma ───
 // AIDEN — Roles & permissions (RBAC).
 //
 // Composed into the consumer's `prisma/schema.prisma` via
