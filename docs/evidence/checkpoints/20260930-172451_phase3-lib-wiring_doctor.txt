@@ -1,0 +1,18 @@
+aiden doctor
+
+1. aiden.config
+   ✓ C:\Users\edwar\mason-aiden-certificate\aiden.config.ts valid (v2.0.1)
+
+2. Environment variables
+   ✓ all 3 required vars present
+
+3. CVE scan (osv-scanner)
+   ✓ no vulnerabilities found
+
+4. npm audit (high/critical only)
+   ✓ clean
+
+5. SDK wiring
+   ✓ <ThemeProvider> mounted in root layout
+
+All checks passed.
