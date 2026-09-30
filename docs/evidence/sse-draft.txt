@@ -1,0 +1,173 @@
+data: {"delta":"Subject"}
+
+data: {"delta":": Re"}
+
+data: {"delta":": Invoice charged twice\n\nHi"}
+
+data: {"delta":" there!"}
+
+data: {"delta":"\n\nThanks"}
+
+data: {"delta":" so"}
+
+data: {"delta":" much for reaching out,"}
+
+data: {"delta":" and I'm sorry to hear you"}
+
+data: {"delta":" were"}
+
+data: {"delta":" charged twice for your"}
+
+data: {"delta":" March invoice —"}
+
+data: {"delta":" that's definitely not what"}
+
+data: {"delta":" should"}
+
+data: {"delta":" happen!\n\nI'd be happy"}
+
+data: {"delta":" to help get"}
+
+data: {"delta":" this sorted"}
+
+data: {"delta":" out for you. To process"}
+
+data: {"delta":" the"}
+
+data: {"delta":" duplicate"}
+
+data: {"delta":" charge ref"}
+
+data: {"delta":"und as"}
+
+data: {"delta":" quickly as possible, could"}
+
+data: {"delta":" you please provide the"}
+
+data: {"delta":" following details"}
+
+data: {"delta":"?"}
+
+data: {"delta":"\n\n-"}
+
+data: {"delta":" **"}
+
+data: {"delta":"Your"}
+
+data: {"delta":" account"}
+
+data: {"delta":" email"}
+
+data: {"delta":" or"}
+
+data: {"delta":" account"}
+
+data: {"delta":" ID"}
+
+data: {"delta":"**"}
+
+data: {"delta":"\n- **The last"}
+
+data: {"delta":" 4 digits of the"}
+
+data: {"delta":" card that"}
+
+data: {"delta":" was charged**"}
+
+data: {"delta":"\n- **The dates"}
+
+data: {"delta":" and"}
+
+data: {"delta":" amounts"}
+
+data: {"delta":" of both"}
+
+data: {"delta":" charges**"}
+
+data: {"delta":" (you"}
+
+data: {"delta":" can usually"}
+
+data: {"delta":" find these"}
+
+data: {"delta":" on your"}
+
+data: {"delta":" bank"}
+
+data: {"delta":" statement)"}
+
+data: {"delta":"\n\nOnce we"}
+
+data: {"delta":"'ve"}
+
+data: {"delta":" verified"}
+
+data: {"delta":" the duplicate"}
+
+data: {"delta":" transaction"}
+
+data: {"delta":","}
+
+data: {"delta":" we"}
+
+data: {"delta":"'ll"}
+
+data: {"delta":" get"}
+
+data: {"delta":" the"}
+
+data: {"delta":" refund processed right"}
+
+data: {"delta":" away."}
+
+data: {"delta":" Ref"}
+
+data: {"delta":"unds typically"}
+
+data: {"delta":" appear"}
+
+data: {"delta":" back"}
+
+data: {"delta":" on"}
+
+data: {"delta":" your card"}
+
+data: {"delta":" within **"}
+
+data: {"delta":"5"}
+
+data: {"delta":"–"}
+
+data: {"delta":"10"}
+
+data: {"delta":" business days**,"}
+
+data: {"delta":" depending on your bank."}
+
+data: {"delta":"\n\nAgain"}
+
+data: {"delta":", I apologize for the incon"}
+
+data: {"delta":"venience and"}
+
+data: {"delta":" we"}
+
+data: {"delta":" appreciate your patience while"}
+
+data: {"delta":" we look"}
+
+data: {"delta":" into this!"}
+
+data: {"delta":" "}
+
+data: {"delta":"😊"}
+
+data: {"delta":"\n\nWarm regards,\nCustomer"}
+
+data: {"delta":" Support"}
+
+data: {"delta":" Team"}
+
+event: done
+data: {"text":"Subject: Re: Invoice charged twice\n\nHi there!\n\nThanks so much for reaching out, and I'm sorry to hear you were charged twice for your March invoice — that's definitely not what should happen!\n\nI'd be happy to help get this sorted out for you. To process the duplicate charge refund as quickly as possible, could you please provide the following details?\n\n- **Your account email or account ID**\n- **The last 4 digits of the card that was charged**\n- **The dates and amounts of both charges** (you can usually find these on your bank statement)\n\nOnce we've verified the duplicate transaction, we'll get the refund processed right away. Refunds typically appear back on your card within **5–10 business days**, depending on your bank.\n\nAgain, I apologize for the inconvenience and we appreciate your patience while we look into this! 😊\n\nWarm regards,\nCustomer Support Team","toolCalls":[],"usage":{"promptTokens":150,"completionTokens":203,"totalTokens":353,"costUSD":0.003495,"latencyMs":5191},"finishReason":"end_turn","model":"claude-sonnet-4-6"}
+

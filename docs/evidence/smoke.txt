@@ -1,0 +1,8 @@
+PASS 1 unauthenticated GET /api/tickets (401)
+PASS 2 malformed create body (400)
+PASS 3 cross-tenant GET (404)
+PASS 4 IDOR PATCH other agent same-org (404)
+PASS 5 missing id (404)
+PASS 6 viewer POST draft (403)
+PASS 7 404 bodies identical (no enumeration leak)
+== 7 passed, 0 failed
