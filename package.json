@@ -18,6 +18,7 @@
     "clean": "rm -rf .next .turbo dist src/generated"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@auth/prisma-adapter": "^2.11.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.4.2",
@@ -36,6 +37,7 @@
     "next": "^16.2.5",
     "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.6",
+    "openai": "^7.25.0",
     "prisma": "^7.4.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -60,8 +62,5 @@
   "overrides": {
     "deepmerge-ts": "^8.0.2",
     "mysql2": "^3.24.5"
-  },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
   }
 }
