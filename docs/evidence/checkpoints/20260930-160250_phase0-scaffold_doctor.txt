@@ -1,0 +1,4 @@
+aiden doctor
+
+1. aiden.config
+   ✗ aiden-cli: failed to parse aiden.config.ts literal: Bad control character in string literal in JSON at position 287 (line 12 column 19)

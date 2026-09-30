@@ -1,0 +1,19 @@
+aiden upgrade (dry-run)
+
+file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:94
+    throw new Error(
+          ^
+
+Error: aiden-cli: failed to parse aiden.config.ts literal: Bad control character in string literal in JSON at position 287 (line 12 column 19)
+    at parseTsConfigLiteral (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:94:11)
+    at readConfig (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:77:10)
+    at loadAidenConfig (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:54:23)
+    at upgrade (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:970:28)
+    at CAC.<anonymous> (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:1132:22)
+    at CAC.runMatchedCommand (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/node_modules/cac/dist/index.mjs:610:34)
+    at CAC.parse (file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/node_modules/cac/dist/index.mjs:537:12)
+    at file:///C:/Users/edwar/AppData/Roaming/npm/node_modules/@upstart13-com/aiden-cli/dist/cli.js:1165:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)
+    at async node:internal/modules/esm/loader:639:26
+
+Node.js v24.15.0
