@@ -1,1 +1,2 @@
 [2026-09-30 16:03] completed chore(phase0): git init, scaffold commit, checkpoint script, phase0 baseline — doctor red (aiden.config.ts parse error, CLI 2.0.1); GitHub push pending owner
+[2026-09-30 16:24] completed fix(config): aiden doctor green — CLI-parseable aiden.config.ts, local Postgres 16 (conda) + DATABASE_URL/AUTH_SECRET, upgrade --target workaround; npm install still pending
