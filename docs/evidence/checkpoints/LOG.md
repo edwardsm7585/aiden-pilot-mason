@@ -14,3 +14,4 @@ NOTE | 20260930-162356, 163145, 171146, 171201 | upgrade dry-run no-op reason: a
 20260930-173244 | phase3-verified | doctor=0 | upgrade-dry-run=0
 20260930-173847 | phase4a-ticket-routes | doctor=0 | upgrade-dry-run=2
 20260930-173859 | phase4a-ticket-routes | doctor=0 | upgrade-dry-run=0
+NOTE | 20260930-173847 phase4a-ticket-routes | upgrade skipped: admin routes were still uncommitted; re-run 173859 on a clean tree is green

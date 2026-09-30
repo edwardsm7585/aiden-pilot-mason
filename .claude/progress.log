@@ -6,3 +6,4 @@
 [2026-09-30 17:30] completed chore: phase 1–2 loose ends — provider SDKs installed, dead seed field removed, LOG.md no-op/red-run notes
 [2026-09-30 18:10] completed feat(lib): Phase 3 wiring — tenancy, validation, schemas, abilities, single AI client, usage sink, triage (live-tested 6/6 on sonnet-4-6), audit jsonl sink, proxy headers; deviations 4–7 logged
 [2026-09-30 18:40] completed fix(lib): phase 3 double-check — dev server verified (headers, auth redirect, login); fixed sink registration (audit rows were never written) and Next 16 async headers() in audit meta; deviations 8–9
+[2026-09-30 18:55] completed feat(api): Phase 4 — 10 routes; smoke 7/7 + 36 extended probes; AIUsage verified for triage and end-of-stream draft (user attributed, request_id joins audit)
