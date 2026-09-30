@@ -15,7 +15,10 @@ echo "== [$LABEL] aiden upgrade --dry-run"
 if [ -n "$DIRTY" ]; then
   echo "SKIPPED: working tree dirty. Commit first, then re-run." | tee "$DIR/${TS}_${LABEL}_upgrade.txt"; UPG=2
 else
-  $CLI upgrade --dry-run 2>&1 | tee "$DIR/${TS}_${LABEL}_upgrade.txt"; UPG=${PIPESTATUS[0]}
+  # aiden-cli 2.0.1 resolves "latest" via spawnSync("npm") without a shell, which
+  # fails with ENOENT on Windows (npm is npm.cmd). Resolve it here and pass --target.
+  LATEST=$(npm view @upstart13-com/aiden-ai version 2>/dev/null)
+  $CLI upgrade --dry-run ${LATEST:+--target "$LATEST"} 2>&1 | tee "$DIR/${TS}_${LABEL}_upgrade.txt"; UPG=${PIPESTATUS[0]}
 fi
 
 printf "%s | %s | doctor=%s | upgrade-dry-run=%s\n" "$TS" "$LABEL" "$DOC" "$UPG" | tee -a "$DIR/LOG.md"

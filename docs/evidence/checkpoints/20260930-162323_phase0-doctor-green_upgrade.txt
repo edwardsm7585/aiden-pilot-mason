@@ -1,0 +1,4 @@
+aiden upgrade (dry-run)
+
+Current version: 2.0.1
+✗ Could not resolve latest version from registry.
