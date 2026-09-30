@@ -213,6 +213,7 @@ Events are emitted with `auditLog()` from `@/lib/security`. `timestamp`, `reques
 | `src/lib/ai.ts` | rewrite to one config-driven `createAIClient` call via a memoised `getAI()` (D6) |
 | `src/lib/ai-usage.ts` | **new**: `setAIUsageSink` (from aiden-logging) → `AIUsage` row; imported from `instrumentation.ts` |
 | `src/lib/triage.ts` | **new**: `classifyTicket()`, structured output + Zod validation |
+| `src/lib/ticket-prompt.ts` | **new**: `<ticket>` fencing and system prompts shared by triage and draft (deviation 4) |
 | `src/lib/audit.ts` | add the `AUDIT_SINK=jsonl` branch (D7) |
 | `src/instrumentation.ts` | also import `@/lib/ai-usage` on the Node.js runtime |
 | `src/proxy.ts` | **new**: security headers |
@@ -281,6 +282,10 @@ Must be dated **before** the first UI commit.
 | 1 | 2026-09-30 | PR #1 was closed without review. The candidate merged `plan` into `main` locally and proceeded on the assumption it will be approved. | Implementation starts only after reviewer approval | Merge `8e79e38` records the plan before any implementation commit; reviewer approval is still pending (see Approval) | Yes: Approval section |
 | 2 | 2026-09-30 | With no prior migrations, `migrate dev` would have folded the starter's own tables (users, auth, audit, RBAC) into `add_deskline_core` | One migration, `add_deskline_core` | Created a baseline `init` migration from the unmerged starter schema first; `add_deskline_core` has only the 4 DeskLine tables | Yes: §6 |
 | 3 | 2026-09-30 | `npm run db:seed` did nothing: Prisma 7 ignores the starter's `package.json` `"prisma.seed"` field | `prisma.config.ts` not in §6 | Added `migrations.seed: "tsx prisma/seed.ts"` to `prisma.config.ts`; recorded in `.claude/fixes/prisma.md` | Yes: §6 |
+| 4 | 2026-09-30 | Triage and draft both need the same `<ticket>` fencing and system prompts | Fencing described in AI safety; no file listed | New `src/lib/ticket-prompt.ts` (`fenceTicket`, `TRIAGE_SYSTEM`, `DRAFT_SYSTEM`) so the two can't drift | Yes: §6 |
+| 5 | 2026-09-30 | Live test: `claude-haiku-4-5` wrapped triage JSON in ```` ```json ```` fences on 6/6 calls. The Anthropic adapter ignores `responseSchema` (it only `JSON.parse`s the text), so triage would always be `null`. A trailing format rule only reached 4/6. | Default model `claude-haiku-4-5`; `temperature: 0` | `ai.models.anthropic` = `claude-sonnet-4-6` (6/6 valid twice, in the SDK price table, not deprecated). Dropped `temperature` (Sonnet 5.5 rejects it) so a model switch can't break triage. No regex/`JSON.parse` added. Upstream: adapter should use native structured output. | Yes: D6 |
+| 6 | 2026-09-30 | Only `ANTHROPIC_API_KEY` is available | D6: `anthropic` and `openai` both `true` | `openai: false` until `OPENAI_API_KEY` is added, so doctor stays green; the one-line `ai.active` switch is unchanged and is exercised in Phase 6 | Pending |
+| 7 | 2026-09-30 | The SDK default CSP (`script-src 'self'`) blocks App Router hydration and next-themes' inline scripts; `securityHeaders` takes a static CSP (no nonce) | `proxy = securityHeaders(...)` with defaults | `src/proxy.ts` passes the default CSP with `script-src 'self' 'unsafe-inline'` (+ `'unsafe-eval'` in dev only); all other headers unchanged. Upstream: nonce support. To confirm in Phase 4 against the dev server. | Yes: §4 |
 
 ## Verify-against-plan record
 
