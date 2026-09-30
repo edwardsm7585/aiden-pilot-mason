@@ -1,0 +1,5 @@
+aiden upgrade (dry-run)
+
+Current version: 2.0.1
+Target version:  2.0.1
+✓ Already up to date.
