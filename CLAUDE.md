@@ -295,3 +295,13 @@ After completing any task, append a one-line entry to `.claude/progress.log`:
 ## Lessons Learned
 
 When you encounter a bug that took multiple attempts to fix, a non-obvious framework gotcha, or a configuration issue, record it in `.claude/fixes/<category>.md`. Create fix files as needed. Update `.claude/fixes/INDEX.md` as the aggregated index.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
