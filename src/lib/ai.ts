@@ -5,18 +5,17 @@
  * the corresponding SDK.
  *
  * Each factory resolves its model from `aiden.config.ts`
- * (`ai.providers[x].model`) and falls back to a built-in default only
- * when that field is unset. Pass an explicit `model` arg to override.
+ * (`ai.models[x]`). Pass an explicit `model` arg to override.
  */
 
 import { createAIClient, type AIClient } from "@upstart13-com/aiden-ai";
 import { aidenConfig } from "@/../aiden.config";
 
-const providerModels = aidenConfig.ai.providers;
+const providerModels = aidenConfig.ai.models;
 
 export const ai = {
   openai: (
-    model = providerModels.openai.model ?? "gpt-4o-mini"
+    model = providerModels.openai
   ): Promise<AIClient> =>
     createAIClient({
       provider: "openai",
@@ -24,7 +23,7 @@ export const ai = {
       apiKey: process.env.OPENAI_API_KEY,
     }),
   anthropic: (
-    model = providerModels.anthropic.model ?? "claude-haiku-4-5"
+    model = providerModels.anthropic
   ): Promise<AIClient> =>
     createAIClient({
       provider: "anthropic",
@@ -32,7 +31,7 @@ export const ai = {
       apiKey: process.env.ANTHROPIC_API_KEY,
     }),
   google: (
-    model = providerModels.google.model ?? "gemini-2.5-flash"
+    model = providerModels.google
   ): Promise<AIClient> =>
     createAIClient({
       provider: "google",
@@ -40,7 +39,7 @@ export const ai = {
       apiKey: process.env.GOOGLE_API_KEY,
     }),
   mistral: (
-    model = providerModels.mistral.model ?? "mistral-small-latest"
+    model = providerModels.mistral
   ): Promise<AIClient> =>
     createAIClient({
       provider: "mistral",
@@ -48,7 +47,7 @@ export const ai = {
       apiKey: process.env.MISTRAL_API_KEY,
     }),
   groq: (
-    model = providerModels.groq.model ?? "llama-3.3-70b-versatile"
+    model = providerModels.groq
   ): Promise<AIClient> =>
     createAIClient({
       provider: "groq",
@@ -56,7 +55,7 @@ export const ai = {
       apiKey: process.env.GROQ_API_KEY,
     }),
   cohere: (
-    model = providerModels.cohere.model ?? "command-r"
+    model = providerModels.cohere
   ): Promise<AIClient> =>
     createAIClient({
       provider: "cohere",
