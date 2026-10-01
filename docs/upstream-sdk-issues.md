@@ -1,6 +1,6 @@
 # AIDEN SDK and starter: issues found while building DeskLine
 
-These 16 defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
+These 18 defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
 
 They are ordered by impact; security-relevant ones come first.
 
@@ -119,3 +119,17 @@ if (result?.error) {
 - **Cause:** `spawnSync("npx", ["prisma", "migrate", "deploy", …], { stdio: "inherit" })` without a shell. On Windows `npx` is `npx.cmd`, so the spawn fails with `ENOENT` and `r.status` is `null`. The command then exits `r.status ?? 0`, which turns a failed spawn into success. Same family as item 8, but worse, because it reports success.
 - **Workaround:** the README tells Windows users to run `npx prisma migrate deploy` directly, which applies all three migrations (13 tables). On Linux CI and production hosts, `aiden migrate` works as intended.
 - **Proposed fix:** `shell: process.platform === "win32"` and `process.exit(r.status ?? 1)`, so a spawn that never ran is a failure, never a pass.
+
+### 17. Starter `scripts/postinstall.mjs` silently skips `prisma generate` on Windows
+
+- **Symptom:** after `npm install` on Windows (Node ≥ 18.20.2 / 20.12.2), `src/generated/prisma` doesn't exist, so the first `npm run db:seed` fails with `Cannot find module '../src/generated/prisma/client'`. The install itself reports success.
+- **Cause:** `spawnSync("npm.cmd", ["run", "prisma:generate"])` without a shell. Since the CVE-2024-27980 fix, Node refuses to spawn `.cmd` files that way (`EINVAL`), and `process.exit(result.status ?? 0)` turns the failed spawn into success. Same family as items 8 and 16.
+- **Workaround:** fixed locally. The script runs `spawnSync("npm run prisma:generate", { shell: true })`, a single string, which also avoids Node's DEP0190 warning, and exits 1 if the command never ran. The README's step 3 runs `npm run prisma:generate` explicitly as well.
+- **Proposed fix:** the same change in the starter template. More generally, every CLI and starter spawn should use a shell on Windows and treat a null status as failure.
+
+### 18. Starter `.env.example` overrides the app's configured name
+
+- **Symptom:** a fresh setup that follows "copy `.env.example`" is branded **"My App"** everywhere, although `aiden.config.ts` says `app.name: "DeskLine"`.
+- **Cause:** `.env.example` ships `NEXT_PUBLIC_APP_NAME="My App"` uncommented, and `src/config/brand.ts` prefers the env var over the config.
+- **Workaround:** `.env.example` now leaves it commented out, with a note.
+- **Proposed fix:** ship it commented out, so `aiden.config.ts` is the single source of the name unless deliberately overridden.

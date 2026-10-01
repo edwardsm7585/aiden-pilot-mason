@@ -34,3 +34,8 @@
 - **[2026-10-01]** `⨯ Error: The destination stream closed early` in the prod server log
   - **Cause**: the client cancelled a page/RSC stream mid-response (e.g. a test navigating away during the login form's post-sign-in `router.refresh()`). Reproduced: aborted RSC fetches log it; complete ones never do.
   - **Action**: none; it's a client disconnect, not a server fault. Don't chase it unless it appears without aborted navigations.
+
+- **[2026-10-01]** Fresh clone: no generated Prisma client after `npm install` (Windows)
+  - **Symptom**: `npm run db:seed` → `Cannot find module '../src/generated/prisma/client'`; the original checkout hid it because `src/generated` already existed.
+  - **Root cause**: starter `scripts/postinstall.mjs` spawned `npm.cmd` without a shell → `EINVAL` on Node ≥ 18.20.2/20.12.2 (CVE-2024-27980), and `?? 0` reported success.
+  - **Fix**: `spawnSync("npm run prisma:generate", { shell: true })` and exit 1 when it never ran; README step 3 runs `npm run prisma:generate` explicitly. **Lesson**: test the README on a fresh clone, never only on the working checkout.

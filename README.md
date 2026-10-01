@@ -20,7 +20,7 @@ Needs Node 24, PostgreSQL 16 and `osv-scanner` on PATH (`aiden doctor` runs it).
    No `OPENAI_API_KEY` is needed: only Anthropic is enabled (deviation 19).
 
 2. `npm install`
-3. `npx aiden-db-merge-schema` composes `prisma/fragments/*.prisma` into `prisma/schema.prisma`.
+3. `npm run prisma:generate` composes `prisma/fragments/*.prisma` into `prisma/schema.prisma` (`aiden-db-merge-schema`) and generates the Prisma client. `npm install` already runs this through `postinstall`; running it again is harmless and doesn't depend on the hook.
 4. Apply migrations:
    - **Dev:** `npm run db:migrate`.
    - **CI or production:** `npx @upstart13-com/aiden-cli migrate` (wraps `prisma migrate deploy`).
@@ -91,4 +91,4 @@ Retention and archival are customer-owned (D7). By default, `AuditLog` rows stay
 - **Rate-limit scope:** the per-address limits trust `X-Forwarded-For`, so deploy behind a proxy that sets it. The limit store is in memory, per instance; use a shared `RateLimitStore` when running several instances.
 - **Account deletion and AI cost:** deleting an account hands its tickets to an org owner, but deletes that person's AI cost rows.
 - **Open decisions:** the audit retention period is the owner's call, and the reviewer's sign-off on the plan (PR #1) is pending.
-- **SDK and starter defects:** 16 found during the build are listed with workarounds and proposed fixes in [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md).
+- **SDK and starter defects:** 18 found during the build are listed with workarounds and proposed fixes in [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md).

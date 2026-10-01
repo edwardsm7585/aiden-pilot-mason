@@ -30,9 +30,22 @@ if (process.env.AIDEN_SKIP_POSTINSTALL === "1") {
   process.exit(0);
 }
 
-const result = spawnSync(
-  process.platform === "win32" ? "npm.cmd" : "npm",
-  ["run", "prisma:generate"],
-  { stdio: "inherit" }
-);
-process.exit(result.status ?? 0);
+// One command string through the shell: Node >= 18.20.2 / 20.12.2 refuses to
+// spawn npm.cmd without a shell on Windows (CVE-2024-27980 fix, EINVAL), and a
+// single string avoids the DEP0190 warning for shell + args.
+const result = spawnSync("npm run prisma:generate", {
+  shell: true,
+  stdio: "inherit",
+});
+if (result.error || result.status === null) {
+  // Never report success for a command that didn't run: the starter's
+  // "result.status ?? 0" turned a failed spawn into a silent pass, leaving no
+  // generated Prisma client.
+  console.error(
+    "[aiden-starter] could not run prisma:generate:",
+    result.error?.message ?? "no exit status",
+    "- run it yourself: npm run prisma:generate"
+  );
+  process.exit(1);
+}
+process.exit(result.status);
