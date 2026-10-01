@@ -18,3 +18,4 @@ NOTE | 20260930-173847 phase4a-ticket-routes | upgrade skipped: admin routes wer
 20260930-173913 | phase4b-admin-routes | doctor=0 | upgrade-dry-run=0
 20260930-180537 | phase5-ui | doctor=0 | upgrade-dry-run=0
 20260930-181749 | phase6a-after-provider-switch | doctor=0 | upgrade-dry-run=2
+20260930-181752 | phase6b-after-audit-sink | doctor=0 | upgrade-dry-run=2
