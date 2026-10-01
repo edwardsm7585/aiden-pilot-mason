@@ -1,0 +1,110 @@
+# Unit tests, redaction check and mutation testing — 2026-10-01 15:52:06
+
+## npm test (vitest 4.1.11)
+
+```
+✓ tests/infra.test.ts > clientIp: the address the trusted proxy saw > ignores client-supplied entries on the left (anti-spoofing)
+✓ tests/infra.test.ts > clientIp: the address the trusted proxy saw > uses the single entry when there is no proxy chain
+✓ tests/infra.test.ts > clientIp: the address the trusted proxy saw > counts TRUSTED_PROXY_HOPS from the right for proxy chains
+✓ tests/infra.test.ts > clientIp: the address the trusted proxy saw > falls back to x-real-ip, then one shared bucket (fail closed)
+✓ tests/infra.test.ts > isSerializationConflict: both pg-adapter shapes > recognises P2034 (conflict during a query)
+✓ tests/infra.test.ts > isSerializationConflict: both pg-adapter shapes > recognises a DriverAdapterError at commit
+✓ tests/infra.test.ts > isSerializationConflict: both pg-adapter shapes > doesn't swallow other errors
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts top-level password
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts nested password
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts top-level token
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts nested apiKey
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts top-level apiKey
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts client secret
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts nested secret
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts access token
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts refresh token
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts authorization header
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts cookie header
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts set-cookie header
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts bare headers object
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > redacts password hash
+✓ tests/logger-redaction.test.ts > log redaction (src/lib/logger.ts REDACT_PATHS) > keeps usage metadata (what ai.usage logs) readable
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > rejects a non-cuid id (→ 400 before any query)
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > requires a subject and a message, trimmed
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > caps subject and body length
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > PATCH needs at least one field and can't close (close has its own route)
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > only known tones, roles and statuses pass
+✓ tests/input-and-ai-safety.test.ts > request schemas (plan §4, D5) > triage output is enum-only, so the model can't write free text
+✓ tests/input-and-ai-safety.test.ts > prompt-injection fencing (plan AI safety) > keeps exactly one real fence when the ticket tries to close it
+✓ tests/input-and-ai-safety.test.ts > prompt-injection fencing (plan AI safety) > catches spaced and upper-case tag variants
+✓ tests/input-and-ai-safety.test.ts > prompt-injection fencing (plan AI safety) > leaves ordinary text alone
+✓ tests/input-and-ai-safety.test.ts > prompt-injection fencing (plan AI safety) > both system prompts mark ticket content as untrusted data
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ticket.read: owner true, agent true, viewer true
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ticket.create: owner true, agent true, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ticket.update: owner true, agent true, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ticket.close: owner true, agent true, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ai.draft: owner true, agent true, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > ai.classify: owner true, agent true, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > member.manage: owner true, agent false, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > audit.read: owner true, agent false, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > usage.read: owner true, agent false, viewer false
+✓ tests/permissions.test.ts > ability matrix (plan §3) > a user with no membership can do nothing (D4)
+✓ tests/permissions.test.ts > ability matrix (plan §3) > assertCan throws AbilityError (→ 403) for a viewer drafting
+✓ tests/permissions.test.ts > orgSession (D2) > replaces global roles with the org role, so admin can't leak into org checks
+✓ tests/permissions.test.ts > orgSession (D2) > gives no roles without a membership
+✓ tests/permissions.test.ts > orgSession (D2) > keeps global admin abilities on the raw session only
+✓ tests/permissions.test.ts > two-step tenant scoping (plan §4, D1) > agents are limited to their own tickets in their org
+✓ tests/permissions.test.ts > two-step tenant scoping (plan §4, D1) > owners and viewers see the whole org
+✓ tests/permissions.test.ts > two-step tenant scoping (plan §4, D1) > no membership scopes to a sentinel org that matches nothing (D4)
+✓ tests/permissions.test.ts > two-step tenant scoping (plan §4, D1) > a scoped miss (missing, other org, other agent) becomes OwnershipError (→ 404)
+✓ tests/permissions.test.ts > two-step tenant scoping (plan §4, D1) > a row the scoped query returned passes step 2
+Test Files  4 passed (4)
+Tests  51 passed (51)
+```
+
+## Redaction check: before vs after
+
+Same 14 secret shapes logged through pino with (a) aiden-logging's default paths and (b) src/lib/logger.ts REDACT_PATHS:
+
+- SDK defaults: **9 of 14 leaked** (top-level password/token/apiKey, secret, clientSecret, accessToken, refreshToken, set-cookie, bare headers object). The defaults' "*.key" form only matches one level deep.
+- DeskLine paths: **14 of 14 redacted**; usage metadata (provider, model, tokens, cost) stays readable.
+- Production build after the change: smoke 7/7, ai.usage line readable, 0 server errors.
+
+## Mutation testing (do the tests catch real regressions?)
+
+Each mutation was applied to the source, the suite run, and the source restored:
+
+| Mutation | Suite result |
+|---|---|
+| `ticketScope`: agents see the whole org (IDOR) | 1 failed |
+| `neutralise`: fence escaping disabled | 2 failed |
+| `clientIp`: reads the spoofable leftmost entry | 2 failed |
+| abilities: viewers may draft | 2 failed |
+| logger: redaction extensions removed | 8 failed |
+
+All five caught. End-to-end behaviour stays covered by scripts/smoke.sh and the evidence suites.
+
+## Regression after the tests/redaction/perimeter-order changes
+
+
+## smoke + matrix + AI usage (phase4 harness)
+== 7 passed, 0 failed
+ai_usage rows added: 2 (expected 2)
+audit metadata containing ticket text: 0
+== matrix: 37 passed, 0 failed
+
+## F4 sign-in rate limit (fresh DB: empty limiter table)
+== 12 passed, 0 failed
+
+## F3 account deletion
+== 17 passed, 0 failed
+
+## security-guide gaps (spend alert threshold 0.003)
+== 18 passed, 0 failed
+
+## design-system runtime + CSP browser flow
+== 17 passed, 0 failed
+page/console errors: none
+CSP violations during normal use (steps 1-3): none
+page errors: none
+
+server errors in last prod log: 1
+(The 1 server-log error is "The destination stream closed early": a browser cancelling a page stream mid-response during the browser suites; documented in .claude/fixes/nextjs.md.)
+
+Reordered admin routes (production): non-admin roles PATCH on a missing user 403, on an existing user 403 (no existence oracle); malformed id 400; admin users query checks 7/7 in the guide suite.

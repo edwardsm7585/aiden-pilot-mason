@@ -1,6 +1,6 @@
 # AIDEN SDK and starter: issues found while building DeskLine
 
-These 18 defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
+These 20 defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
 
 They are ordered by impact; security-relevant ones come first.
 
@@ -133,3 +133,16 @@ if (result?.error) {
 - **Cause:** `.env.example` ships `NEXT_PUBLIC_APP_NAME="My App"` uncommented, and `src/config/brand.ts` prefers the env var over the config.
 - **Workaround:** `.env.example` now leaves it commented out, with a note.
 - **Proposed fix:** ship it commented out, so `aiden.config.ts` is the single source of the name unless deliberately overridden.
+
+### 19. aiden-logging · default redaction only covers one level deep
+
+- **Symptom:** `log.info({ password })`, `{ token }`, `{ apiKey }` at the top level, and `{ session: { refreshToken } }`, `clientSecret`, `set-cookie` headers and bare `headers` objects reach the logs unredacted. A test logged 14 secret shapes through the defaults, and **9 leaked**.
+- **Cause:** the defaults use pino's `*.key` form (`*.password`, `*.token`, …), which matches exactly one level below the root and not the root itself. `secret`, `accessToken`, `refreshToken`, `clientSecret` and `set-cookie` aren't listed at all.
+- **Workaround:** `src/lib/logger.ts` passes an extended `redact` list (each key at depth 0–2, plus header shapes) to `createLogger`, keeping the SDK defaults; `tests/logger-redaction.test.ts` holds the 14 cases.
+- **Proposed fix:** ship the extended defaults, and document that pino can't match arbitrary depth, so apps shouldn't log whole request or config objects.
+
+### 20. Starter admin routes: `assertCan` before parsing; unvalidated route param
+
+- **Symptom:** `admin/users` GET and `admin/users/[id]/roles` PATCH call `assertCan` before parsing input, against the canonical perimeter order (rubric auto-fail 3), and the roles route passes `params.id` to Prisma unvalidated.
+- **Workaround:** both parse first (`parseInput(UserId, …)` for the param), then check `users.manage`, then read. For a row-less ability, the check stays before the read, so a non-admin can't use 404 vs 403 to enumerate users. `scripts/check-perimeter.mjs` enforces the order.
+- **Proposed fix:** the same order in the starter template, plus a note in the docs that row-less abilities are checked before the read.

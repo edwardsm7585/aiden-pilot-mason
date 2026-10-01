@@ -3,6 +3,8 @@ import { z } from "zod";
 import { withAuth, parseRequest, assertCan, auditLog } from "@/lib/security";
 import { abilities } from "@/lib/abilities";
 import { prisma } from "@/lib/prisma";
+import { parseInput } from "@/lib/validation";
+import { UserId } from "@/lib/schemas";
 
 const rolesSchema = z.object({
   roles: z.array(z.string().min(1)).max(20),
@@ -16,7 +18,11 @@ interface RouteParams {
 
 export const PATCH = withAuth<Promise<{ id: string }>>(
   async (req, { session, params }) => {
-    assertCan(abilities, session, "users.manage");
+    // Perimeter: parse → assertCan → read. A platform-admin action across
+    // users has no owner, so assertOwnership doesn't apply; the ability
+    // needs no row, so it is checked BEFORE the read. Reading first would
+    // let a non-admin tell a missing user (404) from an existing one (403).
+    const { id } = parseInput(UserId, await params);
 
     const ct = req.headers.get("content-type") ?? "";
     if (!ct.toLowerCase().includes("application/json")) {
@@ -26,8 +32,8 @@ export const PATCH = withAuth<Promise<{ id: string }>>(
       );
     }
 
-    const { id } = await params;
     const { roles } = await parseRequest(req, rolesSchema);
+    assertCan(abilities, session, "users.manage");
 
     const target = await prisma.user.findUnique({
       where: { id },

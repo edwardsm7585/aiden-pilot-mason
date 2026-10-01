@@ -26,6 +26,7 @@ chk "E1: nextauth GET only adds request context to Auth.js" 'grep -q "^export co
 chk "E1: public auth routes open a request context" 'for f in "$NA" src/app/api/auth/register/route.ts; do grep -q "withPublicRequestContext(" "$f" || echo "$f: no request context (audit rows lose requestId)"; done'
 chk "E1: nextauth POST rate-limits credentials sign-in (F4)" 'grep -q "withRateLimit(" "$NA" || echo "lost withRateLimit"; grep -q "/callback/credentials" "$NA" || echo "lost the credentials-callback match"; grep -q "handlers.POST(" "$NA" || echo "POST no longer delegates to Auth.js"'
 chk "E1: register route is rate-limited" 'grep -q "withRateLimit(" src/app/api/auth/register/route.ts || echo "register route lost withRateLimit"'
+chk "perimeter order (parse → read → own → can → write)" 'node scripts/check-perimeter.mjs'
 chk "raw req.json()"                      'grep -rn "req\.json()" src'
 chk "inline owner comparison"             'grep -rnE "(userId|ownerId)\s*===" src/app'
 chk "findUnique on tenant tables in routes" 'grep -rnE "(ticket|membership)\.findUnique" src/app/api'
@@ -60,6 +61,9 @@ chk "globals.css not imported"            'grep -qE "aiden-ui/styles/globals.css
 chk "page without PageHeader (E2 excluded)" 'for f in $(find src/app -name page.tsx -not -path "*login*" -not -path "*register*" -not -path "*(marketing)*" -not -path "src/app/dashboard/settings/*"); do grep -q "PageHeader" "$f" || grep -qE "^\s*redirect\(" "$f" || echo "$f"; done'
 chk "E2: redirect-only pages render nothing else" 'for f in $(find src/app -name page.tsx -not -path "*(marketing)*" -not -path "src/app/dashboard/settings/*"); do if ! grep -q PageHeader "$f" && grep -qE "^\s*redirect\(" "$f"; then grep -q "<" "$f" && echo "$f renders JSX without PageHeader"; fi; done'
 chk "E2: settings layout renders PageHeader" 'grep -q "PageHeader" src/app/dashboard/settings/layout.tsx || echo "settings layout lost PageHeader"'
+
+# ── Unit tests ───────────────────────────────────────────────────────────────
+chk "unit tests (npm test)"               'npx --no-install vitest run >/dev/null 2>&1 || echo "failing: run npm test"'
 
 # ── Repo hygiene ─────────────────────────────────────────────────────────────
 # Formatting standard = the starter's own (Prettier, trailingComma es5; pinned

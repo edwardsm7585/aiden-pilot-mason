@@ -16,12 +16,13 @@ const UsersQuery = z.object({
 });
 
 export const GET = withAuth(async (req, { session }) => {
-  assertCan(abilities, session, "users.manage");
-
+  // parse → assertCan → read: a global-role ability needs no row, so it is
+  // checked before any query (see admin/users/[id]/roles for why).
   const { q, cursor, limit } = parseInput(
     UsersQuery,
     Object.fromEntries(new URL(req.url).searchParams)
   );
+  assertCan(abilities, session, "users.manage");
 
   const where = q
     ? {

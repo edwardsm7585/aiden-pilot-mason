@@ -69,6 +69,7 @@ Retention and archival are customer-owned (D7). DeskLine's policy: keep audit ro
 | `bash scripts/smoke.sh`                                      | Same suite, with cookies and ids exported by hand (see the script header)                                                                                                                |
 | `bash scripts/verify.sh`                                     | Convention and security sweep, including perimeter, no-ship sinks, secrets, design-system rules, CSP, formatting and schema drift. Named exceptions E1–E4 are asserted, not just skipped |
 | `bash scripts/checkpoint.sh <label>`                         | `aiden doctor` plus `aiden upgrade --dry-run`. It never skips either check, and it fails on a skipped CVE scan or a dirty tree. History is in `docs/evidence/checkpoints/LOG.md`         |
+| `npm test`                                                   | 51 unit tests (Vitest): permission matrix, two-step tenant scoping, prompt-injection fencing, input schemas, client IP, conflict detection, log redaction                                |
 | `npx tsc --noEmit`, `npm run lint`, `npx prettier --check .` | Type check, lint and formatting                                                                                                                                                          |
 | CI: `.github/workflows/security.yml`                         | osv-scanner and `npm audit` on every push and pull request, and weekly                                                                                                                   |
 
@@ -105,7 +106,7 @@ Retention and archival are customer-owned (D7). DeskLine's policy: keep audit ro
 | [`docs/self-assessment.md`](docs/self-assessment.md)         | M12 readiness bars and the rubric self-score                                                    |
 | [`docs/acceptance-matrix.md`](docs/acceptance-matrix.md)     | Every Spec §4 acceptance criterion with evidence                                                |
 | [`docs/audit-retention.md`](docs/audit-retention.md)         | Audit retention, anonymisation and archival policy                                              |
-| [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md) | 18 SDK and starter defects found, with workarounds and proposed fixes                           |
+| [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md) | 20 SDK and starter defects found, with workarounds and proposed fixes                           |
 
 ## Reference docs
 
@@ -116,4 +117,4 @@ Capstone: [project brief](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3
 ## Known limitations
 
 - **Plan approval:** the reviewer's sign-off on PR #1 is pending. The plan was merged by the candidate, as the plan's Approval section records.
-- **SDK defects:** 18 SDK and starter defects are worked around locally ([`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md)). Fixing them belongs upstream, for example a native rate-limit message in the SDK's `LoginForm`.
+- **SDK defects:** 20 SDK and starter defects are worked around locally ([`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md)). Fixing them belongs upstream, for example a native rate-limit message in the SDK's `LoginForm`.

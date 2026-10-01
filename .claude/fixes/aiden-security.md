@@ -22,3 +22,7 @@
   - **Root cause**: `clientIp` read the leftmost `X-Forwarded-For` entry (client-controlled even behind a proxy; Next only fills the header when absent, with `??=`), and the SDK default store is in memory.
   - **Fix**: take entry `len - TRUSTED_PROXY_HOPS` (the one the outermost trusted proxy appended); Postgres `RateLimitStore` with SHA-256 keys (`src/lib/rate-limit-store.ts`). Proven with two instances, a restart, and spoofed left-hand entries.
   - **Note**: `npx shadcn add` can't resolve the `utils` alias when it points at `@upstart13-com/aiden-ui`, and it silently installs an unrelated npm package `cn` and imports from it. Shim `@/lib/utils` → aiden-ui `cn`, add the component, then restore the alias, fix the import and `npm uninstall cn`.
+
+- **[2026-10-01]** aiden-logging default redaction is one level deep (pino `*.key`)
+  - **Symptom**: a redaction test found 9 of 14 secret shapes logged in clear (top-level `password`/`token`/`apiKey`, `secret`, `accessToken`, `refreshToken`, `set-cookie`, bare `headers`).
+  - **Fix**: `src/lib/logger.ts` passes `redact` with each key at depth 0–2 plus header shapes (SDK defaults kept); `tests/logger-redaction.test.ts`. pino can't match arbitrary depth, so don't log whole request/config objects.

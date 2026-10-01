@@ -10,6 +10,8 @@ export const TicketId = z.object({ id: z.string().cuid() });
 
 export const MemberId = z.object({ id: z.string().cuid() });
 
+export const UserId = z.object({ id: z.string().cuid() });
+
 export const ListTicketsQuery = z.object({
   status: z.enum(["open", "pending", "closed"]).optional(),
 });
