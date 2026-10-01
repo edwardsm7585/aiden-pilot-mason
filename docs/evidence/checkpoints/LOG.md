@@ -40,3 +40,5 @@ NOTE | 20260930-171648, 20260930-172451, 20260930-173244, 20260930-173859, 20260
 NOTE | 20261001-135004 phase7-submission | upgrade dry-run no-op reason: already on the latest published version (2.0.1 == 2.0.1); final submission checkpoint
 20261001-141203 | limitations-closed | doctor=0 | upgrade-dry-run=0 | tree=clean | head=a97b011
 NOTE | 20261001-141203 limitations-closed | upgrade dry-run no-op reason: already on the latest published version (2.0.1 == 2.0.1)
+20261001-153613 | docs-recheck | doctor=0 | upgrade-dry-run=0 | tree=clean | head=1af10ed
+NOTE | 20261001-153613 docs-recheck | upgrade dry-run no-op reason: already on the latest published version (2.0.1 == 2.0.1)
