@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { withAuth, parseRequest, assertCan, auditLog } from "@/lib/security";
 import { abilities } from "@/lib/abilities";
 import { prisma } from "@/lib/prisma";
-import { getMembership, orgSession, ticketScope } from "@/lib/tenancy";
+import { getMembership, orgSession } from "@/lib/tenancy";
+import { listTickets } from "@/lib/deskline-data";
 import { parseInput } from "@/lib/validation";
 import { CreateTicketBody, ListTicketsQuery } from "@/lib/schemas";
 import { classifyTicket } from "@/lib/triage";
@@ -18,23 +19,8 @@ export const GET = withAuth(async (req, { session }) => {
   if (!member) return NextResponse.json({ tickets: [] });
   assertCan(abilities, orgSession(session, member), "ticket.read");
 
-  const tickets = await prisma.ticket.findMany({
-    where: {
-      ...ticketScope(member, session.user.id),
-      ...(query.status ? { status: query.status } : {}),
-    },
-    select: {
-      id: true,
-      subject: true,
-      status: true,
-      priority: true,
-      category: true,
-      sentiment: true,
-      ownerId: true,
-      updatedAt: true,
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+  // Org-scoped (own tickets only for agents) via ticketScope in listTickets.
+  const tickets = await listTickets(member, session.user.id, query.status);
   return NextResponse.json({ tickets });
 });
 
