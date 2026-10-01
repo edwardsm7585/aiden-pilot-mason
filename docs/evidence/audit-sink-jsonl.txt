@@ -1,0 +1,2 @@
+{"event":"ticket.create","resourceId":"cmuos9oqf0000lofbphfivsz1","metadata":{"status":"open"},"timestamp":"2026-10-01T00:15:49.628Z","requestId":"3ed62cf0-dfa0-4738-b5a0-45cf8a7458f9","userId":"cmuopvq9v00071gfbwrpu6hab"}
+{"event":"ai.classify","resourceId":"cmuos9oqf0000lofbphfivsz1","metadata":{"ok":true,"priority":"high","category":"technical"},"timestamp":"2026-10-01T00:15:51.024Z","requestId":"3ed62cf0-dfa0-4738-b5a0-45cf8a7458f9","userId":"cmuopvq9v00071gfbwrpu6hab"}

@@ -1,0 +1,7 @@
+mason-aiden-certificate@0.0.0 C:\Users\edwar\mason-aiden-certificate
++-- @upstart13-com/aiden-ai@2.0.1
+| `-- @upstart13-com/aiden-logging@2.0.1 deduped
++-- @upstart13-com/aiden-logging@2.0.1
+`-- @upstart13-com/aiden-security@2.0.1
+  `-- @upstart13-com/aiden-logging@2.0.1 deduped
+

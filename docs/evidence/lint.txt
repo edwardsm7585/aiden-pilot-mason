@@ -1,0 +1,4 @@
+
+> mason-aiden-certificate@0.0.0 lint
+> eslint
+
