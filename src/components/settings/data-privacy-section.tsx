@@ -188,8 +188,15 @@ function DeleteAccountDialog({
   async function onSubmit() {
     const res = await fetch("/api/me", { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Could not delete account", {
-        description: "Please try again in a moment.",
+      // 409 carries the reason (e.g. sole organisation owner); show it as-is.
+      const body = (await res.json().catch(() => null)) as {
+        error?: unknown;
+      } | null;
+      toast.error("Account not deleted", {
+        description:
+          typeof body?.error === "string"
+            ? body.error
+            : "The server didn't respond. Check your connection, then try again.",
       });
       return;
     }
@@ -204,7 +211,8 @@ function DeleteAccountDialog({
           <DialogTitle>Delete your account?</DialogTitle>
           <DialogDescription>
             This permanently removes your profile, OAuth connections, and
-            sessions. Audit log entries are retained. This cannot be undone.
+            sessions. Tickets you own move to an owner of your organisation,
+            and audit log entries are kept. This cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

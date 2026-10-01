@@ -16,3 +16,4 @@
 [2026-10-01 08:43] completed security(seed): closed F2 residual — rotated SEED_PASSWORD, re-seeded, redacted security-review.md, verify.sh guard for live value in tracked files — old password 0/7, guard proven
 [2026-10-01 08:49] completed verify(rerun): phases 1-6 re-run on fresh DB aiden_rerun — all pass; fixed F2a seed password exposure and silent osv skip in checkpoint
 [2026-10-01 08:58] completed security(review): independent re-check of security-review.md at d7cd7af — FAIL: F3 HIGH open (account deletion cascade), F4/F5 MEDIUM; citations corrected
+[2026-10-01 10:11] completed fix(security): F3 — account deletion reassigns tickets to an org owner, refuses last owner; Ticket.owner Restrict migration; serializable last-owner checks — 17/17 + 6/6 races, smoke 7/7, matrix 37/37

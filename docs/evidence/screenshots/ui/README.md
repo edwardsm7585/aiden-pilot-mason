@@ -25,5 +25,7 @@ Captured with headless Chrome using real credential sign-ins (`authjs.session-to
 | `22-form-validation.png` | agent1 | Inline field errors on empty submit |
 | `23-owner-role-changed-toast.png` | owner | Viewer → agent via Select, toast (reverted afterwards) |
 | `24-owner-last-owner-refused.png` | owner | Demoting the last owner → 409 explained; the Select reverts to Owner |
+| `25-delete-account-dialog.png` | owner | Delete-account dialog: says tickets you own move to an org owner (F3 fix) |
+| `26-sole-owner-delete-refused.png` | owner | Sole owner tries to delete their account → 409; the toast gives the reason and the next step (F3 fix) |
 
 DB state and request traces after these runs: `../db-phase5/`.

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import {
-  deleteUserAccount,
-  updateProfileSchema,
-} from "@upstart13-com/aiden-auth";
+import { updateProfileSchema } from "@upstart13-com/aiden-auth";
 import { withAuth, parseRequest, auditLog } from "@/lib/security";
 import { prisma } from "@/lib/prisma";
+import { log } from "@/lib/logger";
+import {
+  AccountDeletionRefused,
+  deleteAccountKeepingOrgData,
+  type AccountDeletionRefusal,
+} from "@/lib/account-deletion";
+import { isSerializationConflict } from "@/lib/db-errors";
 
 export const GET = withAuth(async (_req, { session }) => {
   const user = await prisma.user.findUnique({
@@ -70,14 +74,50 @@ export const PATCH = withAuth(async (req, { session }) => {
   return NextResponse.json({ ok: true, user });
 });
 
+const DELETE_REFUSED: Record<AccountDeletionRefusal, string> = {
+  last_owner:
+    "You're the only owner of your organisation. Make another member an owner, then delete your account.",
+  no_owner_for_tickets:
+    "Your tickets have no organisation owner to go to. Ask for an owner to be added, then try again.",
+};
+
+// DeskLine: tickets belong to the org, so they are handed to an org owner
+// rather than deleted with the user, and the last owner can't leave
+// (security finding F3; see src/lib/account-deletion.ts).
 export const DELETE = withAuth(async (_req, { session }) => {
+  let result;
+  try {
+    result = await deleteAccountKeepingOrgData(session.user.id);
+  } catch (err) {
+    if (err instanceof AccountDeletionRefused) {
+      return NextResponse.json(
+        { error: DELETE_REFUSED[err.reason] },
+        { status: 409 }
+      );
+    }
+    if (isSerializationConflict(err)) {
+      return NextResponse.json(
+        { error: "Your organisation changed while deleting. Try again." },
+        { status: 409 }
+      );
+    }
+    log.error({ err }, "account deletion failed");
+    throw err;
+  }
+
+  if (result.reassignedTickets > 0) {
+    auditLog({
+      event: "ticket.reassign",
+      actorId: session.user.id,
+      resourceId: result.reassignedTo ?? undefined,
+      metadata: { count: result.reassignedTickets, reason: "account.delete" },
+    });
+  }
   auditLog({
     event: "user.delete",
     actorId: session.user.id,
     resourceId: session.user.id,
   });
-
-  await deleteUserAccount(prisma, session.user.id);
 
   return new NextResponse(null, { status: 204 });
 });

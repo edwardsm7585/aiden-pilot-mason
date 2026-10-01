@@ -43,3 +43,7 @@ dotenv.config({ path: ".env.local" });
   - **Root cause**: Prisma 7 ignores the `package.json` `"prisma": { "seed": ... }` field the starter ships; it reads `migrations.seed` from `prisma.config.ts`.
   - **Fix**: `migrations: { path: "prisma/migrations", seed: "tsx prisma/seed.ts" }` in `prisma.config.ts`. `.env.local` is already loaded there via dotenv, so the seed inherits `DATABASE_URL`.
   - **Prevention**: Raise upstream so the starter template ships the config-file seed.
+
+- **[2026-10-01]** Serializable conflicts have two shapes with `@prisma/adapter-pg` (Prisma 7.10)
+  - **Symptom**: a `try/catch` matching only `code === "P2034"` let some conflicts through as 500s. Forced-overlap test: conflicts during a query → `PrismaClientKnownRequestError` P2034; conflicts at **commit** → bare `DriverAdapterError`, message `TransactionWriteConflict` (`cause.kind`, `cause.originalCode: "40001"`).
+  - **Fix**: `src/lib/db-errors.ts` `isSerializationConflict()` checks both shapes. Test races by pausing *inside* the transaction between read and write; HTTP-level races rarely overlap.

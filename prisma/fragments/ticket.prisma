@@ -15,7 +15,10 @@ model Ticket {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   org   Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  owner User @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  // Restrict: tickets belong to the org, so deleting a user must never take
+  // tickets with it. Account deletion hands them to an org owner first
+  // (src/lib/account-deletion.ts).
+  owner User @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Restrict)
 
   @@index([orgId])
   @@index([ownerId])

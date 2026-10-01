@@ -13,7 +13,7 @@
 
 | Category | Initial | Findings | Current |
 |----------|--------|----------|---------|
-| Auth & Access Control | PASS | All 8 new/changed DeskLine route files use `withAuth`, validate with `parseRequest`/`parseInput`, and scope every query by org (plus owner for agents) before `assertOwnership` → `assertCan`. Acknowledged public exceptions: `api/auth/[...nextauth]` (Auth.js handler) and `api/auth/register` (rate-limited); both asserted by `verify.sh` E1. NextAuth callbacks unchanged (only an import added to `src/lib/auth.ts`). | **FAIL**: F3 open (starter `DELETE /api/me` cascades org tickets; see re-check) |
+| Auth & Access Control | PASS | All 8 new/changed DeskLine route files use `withAuth`, validate with `parseRequest`/`parseInput`, and scope every query by org (plus owner for agents) before `assertOwnership` → `assertCan`. Acknowledged public exceptions: `api/auth/[...nextauth]` (Auth.js handler) and `api/auth/register` (rate-limited); both asserted by `verify.sh` E1. NextAuth callbacks unchanged (only an import added to `src/lib/auth.ts`). | **PASS**: F3 resolved (see re-check) |
 | Injection Prevention | PASS | No `$executeRawUnsafe`/`$queryRawUnsafe`, `eval`, `new Function`, or `dangerouslySetInnerHTML` in app code (`src/generated` is the Prisma client). No raw `req.json()`: every body goes through Zod. Prompt injection: see `injection-probe.md` (0/18). | PASS |
 | Data Exposure | **FAIL** | 1 HIGH (by this skill's rule): see F1. All other responses use explicit `select` or hand-built objects; no stack traces in responses (`withAuth` maps known errors; prod 500s are generic); no `console.*` in `src/app/api` or `src/lib`; `NEXT_PUBLIC_*` vars are display strings only (`APP_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `APP_COPYRIGHT`). | **PASS**: F1 resolved in `58b360b` |
 | Stripe Security | N/A | No Stripe changes (`billing.enabled: false`). | N/A |
@@ -108,10 +108,20 @@ Every claim above was re-verified against the current code and live requests, wi
   - a sole owner can delete themselves and leave the org with **0 owners**, bypassing the last-owner 409 rule.
 
   Reproduced on the throwaway `aiden_rerun` DB: agent2 `DELETE /api/me` → 204, ticket `a3` gone (org tickets 11 → 10); owner `DELETE /api/me` → 204, Acme owners 1 → 0. The two `user.delete` audit rows remain. The same action is exposed in the UI (Settings → Data & privacy → Delete account).
-  - **Status:** OPEN. The fix needs a product decision on what happens to an org's tickets when their owner leaves.
+  - **Status:** Resolved (candidate chose *reassign + block*):
+    - `src/lib/account-deletion.ts` runs one Serializable transaction that hands the user's tickets to another owner of their org (audit `ticket.reassign {count, reason}`), refuses a sole owner with 409 and a specific message, then deletes the user. `user.delete` is now audited only after a successful delete.
+    - Migration `ticket_owner_restrict` changes `Ticket.owner` from `Cascade` to `Restrict`, so even a raw `DELETE FROM users` can't take tickets with it.
+    - The members role-change last-owner check now runs in a Serializable transaction, so two owners demoting each other at once can't reach 0 owners.
+    - Serialization conflicts arrive in two shapes with the pg adapter (P2034, or a bare `DriverAdapterError` "TransactionWriteConflict" at commit); `src/lib/db-errors.ts` recognises both, so a race returns 409 rather than 500. A first version missed the second shape; the forced-overlap test caught it.
+    - The delete dialog now says tickets move to an org owner and shows the server's reason on refusal (`screenshots/ui/25-…`, `26-…`).
+    - Verified (`f3-account-deletion.txt`): agent deletion keeps the ticket under the owner; sole owner 409 with nothing changed; raw SQL delete refused by the FK; concurrent owner deletions leave exactly one owner and no lost tickets; 6/6 forced-overlap rounds end with one change applied and one 409. Regression: smoke 7/7, extended matrix 37/37.
 - **F4 [MEDIUM] Auth — credentials sign-in is not rate-limited** (starter/SDK): 20 wrong-password attempts in a row were all processed, with no lockout or 429. The demo accounts use a 24-character random password, so they aren't guessable, but real user passwords could be brute-forced. Fix: rate-limit `POST /api/auth/callback/credentials` (raise upstream in `aiden-auth`/`aiden-security`; `verify.sh` E1 currently requires the NextAuth route to only re-export handlers).
 - **F5 [MEDIUM] Defence in depth — production CSP allows `script-src 'unsafe-inline'`** (Next's inline bootstrap scripts need it without nonces). There are no XSS sinks in the code, so nothing is exploitable today, but the CSP wouldn't stop an injected inline script. Fix: nonce-based CSP via `proxy.ts` (upstream `securityHeaders` option).
 
-### Verdict (re-check): **FAIL**
+### Verdict (re-check, initial): FAIL
 
-F3 is a HIGH access-control finding, so the gate fails under this skill's rules until F3 is fixed. F4 and F5 are MEDIUM: they are reported but don't block. Everything else in the original report is confirmed.
+F3 was a HIGH access-control finding, so the gate failed until F3 was fixed.
+
+### Verdict (after the F3 fix): **PASS**
+
+No CRITICAL or HIGH findings remain open. F4 (no sign-in rate limit) and F5 (CSP `unsafe-inline`) are MEDIUM, so under this skill's rules they are reported but don't block. Both are SDK-level and recorded for upstream. Everything else in the original report is confirmed.
