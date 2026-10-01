@@ -257,7 +257,7 @@ Ticket pages live under the starter's existing `src/app/dashboard/` segment, so 
 ## 7. Rollback
 
 1. **Code:** revert the DeskLine feature commits, or deploy the tag cut before them.
-2. **Schema:** delete the four fragments and the `user.prisma` back-relations, run `npm run prisma:merge`, then `npm run db:migrate -- --name drop_deskline_core`. The generated SQL drops `Ticket`, `Membership`, `AIUsage` and `Org`; cascades mean no orphans remain. Rehearsed on a throwaway branch in Phase 6.
+2. **Schema:** delete the four fragments and the `user.prisma` back-relations, run `npm run prisma:merge`, then generate `drop_deskline_core` with `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script` and apply it with `prisma migrate deploy` (`migrate dev` refuses data-loss migrations non-interactively; deviation 24). The generated SQL drops `Ticket`, `Membership`, `AIUsage` and `Org`; cascades mean no orphans remain. Rehearsed on a throwaway branch in Phase 6.
 3. **AI kill-switch** (no deploy needed): set every `ai.providers.*` to `false`. `classifyTicket` then skips and records `ai.classify { ok: false }`, and the draft route responds 503 "AI unavailable".
 4. **Audit sink:** `AUDIT_SINK=jsonl` swaps storage without code changes (D7).
 5. **What persists (accepted):** `AuditLog` rows remain after rollback, since it's the shipped table and is untouched by the drop migration. Rows still reference the dropped ticket and membership ids by string. This is intentional: the audit trail outlives the feature.
@@ -295,11 +295,13 @@ Must be dated **before** the first UI commit.
 
 | Control | Where | Evidence |
 |---|---|---|
-| Untrusted ticket text fenced in `<ticket>` tags, and the system prompt forbids following it | | |
-| Closing-tag escape of `</ticket>` inside untrusted text | | |
-| Triage output bounded by `TriageSchema` (enum-only), validated with Zod; no `JSON.parse`/regex in app code | | |
-| No prompts, bodies or outputs in logs, audit metadata, or `AIUsage` | | |
-| Injection probe against `A_T_MALICIOUS` | | `docs/evidence/injection-probe.md` |
+| Untrusted ticket text fenced in `<ticket>` tags, and the system prompt forbids following it | `src/lib/ticket-prompt.ts:18` `fenceTicket()`, `:27` `UNTRUSTED_RULES`; used at `src/lib/triage.ts:37`, `src/app/api/tickets/[id]/draft/route.ts:60` | `injection-probe.md`: 0/9 drafts followed injected instructions |
+| Closing-tag escape of `</ticket>` inside untrusted text | `src/lib/ticket-prompt.ts:11` `FENCE_TAGS`, `:13` `neutralise()` | `injection-probe.md`: V2 fence-break output has exactly one real fence |
+| Triage output bounded by `TriageSchema` (enum-only), validated with Zod; no `JSON.parse`/regex in app code | `src/lib/schemas.ts` `TriageSchema`; `src/lib/triage.ts:41` `safeParse(res.parsed)` | `verify.sh` "JSON.parse/regex on AI output"; probe: 0/9 triages took the injected `urgent` |
+| No prompts, bodies or outputs in logs, audit metadata, or `AIUsage` | `AIUsage` has no text columns; audit metadata keys fixed per event | `verify.sh` "logged bodies/prompts"; Phase 4 audit-key check: 0 rows with ticket text |
+| Injection probe against `A_T_MALICIOUS` | 3 vectors × (3 triage + 3 drafts), real API | `docs/evidence/injection-probe.md` (+ `injection-probe-raw.json`): **0/18 followed** |
+| Draft output format | `DRAFT_SYSTEM`: plain text, no subject line, no invented account details (deviation 15) | `screenshots/ui/08-draft-done.png` |
+| AI kill-switch | `src/lib/ai.ts` `AIUnavailableError` → draft 503, triage `ok:false` | `provider-switch.md` §2: 201 with null triage, 503 draft, 0 AI calls |
 
 ## Deviations log
 
@@ -323,18 +325,24 @@ Must be dated **before** the first UI commit.
 | 16 | 2026-09-30 | Server pages and API routes would have duplicated the org-scoped list/audit/usage queries | Queries inline in routes | `src/lib/deskline-data.ts` (`listTickets`, `listMembers`, `listOrgAudit`, `getOrgUsage`) used by both; the 4 list routes refactored (check order unchanged; smoke re-run 7/7). `[id]` routes keep their explicit `findFirst` + `assertOwnership` | Yes: §6 |
 | 17 | 2026-09-30 | Sidebar showed "Mason Aiden Certificate": `NEXT_PUBLIC_APP_NAME` in `.env.local` overrides `aiden.config.ts` `app.name` | Brand from config | Local `.env.local` value set to `DeskLine` (not committed) | n/a |
 | 18 | 2026-09-30 | Seeded tickets have no triage (the seed doesn't call AI), so list/detail showed "—" | n/a | Triaged the 6 seed tickets through the real API (`PATCH` with unchanged subject, as each owning agent), which also exercises `ticket.update` → `ai.classify`. The injection ticket came back `medium`, not the `urgent` it demands | n/a |
+| 19 | 2026-10-01 | No `OPENAI_API_KEY` (candidate decision), so a second provider can't be called | D6 / runbook 6.3: provider switch shown live | Showed the same one-line mechanism by switching `ai.models.anthropic` (Sonnet 4.6 → Opus 4.6); `AIUsage` recorded the new model, then reverted. Also exercised the AI kill-switch. The `ai.active` provider switch stays a one-line edit | Yes: `provider-switch.md` |
+| 20 | 2026-10-01 | Runbook `verify.sh` checks would fail a correct build: public auth routes lack `withAuth`; settings pages carry `PageHeader` in their layout; `/dashboard` is redirect-only; a marketing-page code sample counts as `createAIClient(`; npm "deduped" lines count as duplicate installs; Prisma's generated client contains `$executeRawUnsafe` | Runbook script verbatim | `scripts/verify.sh` with named exceptions E1–E4, each **asserted** (e.g. register must keep `withRateLimit`); `src/generated` excluded. Planted violations still fail | Yes: §6 |
+| 21 | 2026-10-01 | `next-env.d.ts` is rewritten differently by `next dev` and `next build`, dirtying the tree and skipping checkpoint dry-runs | Tracked by the starter | Untracked and gitignored, per Next's guidance | n/a |
+| 22 | 2026-10-01 | Production server rejected sign-in: Auth.js v5 `UntrustedHost` | Not covered | `.env.example` documents `AUTH_URL` / `AUTH_TRUST_HOST`; prod smoke run with `AUTH_TRUST_HOST=true` (not committed) → 7/7 | n/a |
+| 23 | 2026-10-01 | `/security-review` FAIL: F1 ticket `GET` returned the full row; F2 seed hard-coded the demo password | §4 / seed | `58b360b`: allow-list `select` on the ticket `GET`; `SEED_PASSWORD` from env + no demo accounts in production. Re-run: PASS | Yes: `security-review.md` |
+| 24 | 2026-10-01 | Rollback rehearsal: `prisma migrate dev` refuses non-interactive data-loss migrations | §7 step 2: `db:migrate -- --name drop_deskline_core` | Generate with `prisma migrate diff --from-config-datasource --to-schema … --script`, apply with `prisma migrate deploy` (the CI-safe path) | Yes: §7 via `rollback-rehearsal.md` |
 
 ## Verify-against-plan record
 
 | Dim | Check | Evidence |
 |---|---|---|
-| Outcome | | |
-| Data | | |
-| Permissions | | |
-| Perimeter | | |
-| Audit | | |
-| Files | | |
-| Rollback | | |
+| Outcome | Each persona in the real UI: agent sees/works own tickets and drafts; viewer reads the whole org, read-only with reasons shown; owner sees all plus Members, Audit log, AI cost; another agent's ticket "doesn't exist"; no-org user gets an empty list | `screenshots/ui/` 01–24 (README maps each to the §1 Outcome) |
+| Data | Migration SQL has the 4 tables, `(org_id, status)` index, `ON DELETE CASCADE` on all 6 FKs; `AuditLog` not redefined (shipped fragment only) | `prisma/migrations/*_add_deskline_core/migration.sql`; `screenshots/db/00-schema-visualizer.png` |
+| Permissions | Smoke 2, 3, 4, 6 (400, 404 cross-tenant, 404 IDOR, 403 viewer draft); extended matrix incl. owner-only admin, last-owner 409, D2 role freshness, D4 no-org | `smoke.txt` (prod build), `phase4-route-checks.md` |
+| Perimeter | Smoke 7/7 incl. identical 404 bodies; two-step at `src/lib/tenancy.ts` `ticketScope` + each `[id]` route's `findFirst` → `assertOwnership` (`src/app/api/tickets/[id]/route.ts`, `close/route.ts`, `draft/route.ts`, `admin/members/[id]/route.ts`); prod security headers | `smoke.txt`, `headers.txt`, `verify.sh` |
+| Audit | All 6 planned events plus SDK auto-events (`auth.signin`, `security.ownership_failed`, `security.ability_denied`) present; metadata keys match §5 with no ticket text; request traces join audit to `AIUsage`; jsonl sink swap | `screenshots/db/06-audit_logs.png`, `db-phase5/03-audit_logs.png`, `db-phase5/05-trace-*.png`, `audit-sink-jsonl.txt` |
+| Files | `git diff --stat b070a54..HEAD` (71 files) compared with §6; every extra file is listed in §6 with its deviation | `diff-stat.txt` |
+| Rollback | Throwaway branch + DB copy: drop migration removes exactly the 4 tables; app boots; DeskLine routes 404; all 121 AuditLog rows (63 DeskLine events) remain. AI kill-switch and audit-sink swap also exercised | `rollback-rehearsal.md`, `rollback-drop-migration.sql`, `provider-switch.md` §2 |
 
 ## Approval
 
