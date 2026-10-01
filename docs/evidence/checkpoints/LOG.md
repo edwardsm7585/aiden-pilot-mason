@@ -34,3 +34,4 @@ NOTE | 20261001-084600 osv-guard-test | deliberate test: osv-scanner hidden, doc
 20261001-105741 | security-guide | doctor=0 | upgrade-dry-run=0 | tree=clean | head=aa77baf
 20261001-111724 | design-system | doctor=0 | upgrade-dry-run=0 | tree=clean | head=cc75f65
 20261001-114013 | format-upstream | doctor=0 | upgrade-dry-run=0 | tree=clean | head=d501242
+20261001-122522 | rerun-b-phases0-6 | doctor=0 | upgrade-dry-run=0 | tree=clean | head=3d629c9
