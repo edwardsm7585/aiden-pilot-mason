@@ -20,6 +20,20 @@ import { classifyTicket } from "@/lib/triage";
 
 type RouteParams = Promise<{ id: string }>;
 
+/** Fields a client may see; new columns stay private until added here. */
+const TICKET_FIELDS = {
+  id: true,
+  subject: true,
+  body: true,
+  status: true,
+  priority: true,
+  category: true,
+  sentiment: true,
+  ownerId: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 /** One ticket. Missing, another agent's, or another org's → identical 404. */
 export const GET = withAuth<RouteParams>(async (_req, { session, params }) => {
   const { id } = parseInput(TicketId, await params);
@@ -27,6 +41,7 @@ export const GET = withAuth<RouteParams>(async (_req, { session, params }) => {
   const row = toOwnable(
     await prisma.ticket.findFirst({
       where: ticketScope(member, session.user.id, id),
+      select: TICKET_FIELDS,
     }),
     session.user.id
   );

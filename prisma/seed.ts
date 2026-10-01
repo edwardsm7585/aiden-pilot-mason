@@ -16,8 +16,6 @@ import {
   type OrgRole,
 } from "../src/config/rbac";
 
-/** Local-dev password for every seeded account. */
-const SEED_PASSWORD = "DeskLine-dev-2026";
 
 const ORGS = [
   { id: "cdeskline0org0acme", name: "Acme" },
@@ -127,6 +125,20 @@ async function main(): Promise<void> {
 }
 
 async function seedDeskLine(): Promise<void> {
+  // Demo tenants are local fixtures: never create known-password accounts in
+  // production. The RBAC roles/permissions above are still seeded there.
+  if (process.env.NODE_ENV === "production") {
+    console.log("• skipped DeskLine demo data (NODE_ENV=production)");
+    return;
+  }
+  // Password for every demo account comes from the environment, never source.
+  const seedPassword = process.env.SEED_PASSWORD;
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error(
+      "Set SEED_PASSWORD (12+ characters) in .env.local before seeding demo accounts."
+    );
+  }
+
   for (const org of ORGS) {
     await prisma.org.upsert({
       where: { id: org.id },
@@ -136,7 +148,7 @@ async function seedDeskLine(): Promise<void> {
   }
 
   // Same library + cost factor that aiden-auth's credentialsProvider verifies with.
-  const passwordHash = await bcrypt.hash(SEED_PASSWORD, 12);
+  const passwordHash = await bcrypt.hash(seedPassword, 12);
   const userIds = new Map<string, string>();
   for (const u of USERS) {
     const user = await prisma.user.upsert({
