@@ -19,3 +19,7 @@
 - **[2026-09-30]** `headers()` used synchronously in the starter's audit `captureRequestMeta`
   - **Symptom**: `Route "..." used headers().get. headers() returns a Promise` on every audit event; `ip_address`/`user_agent` always NULL.
   - **Fix**: In the (async) sink, `await headers()` first, then call `createPrismaAuditSink({ prisma, captureRequestMeta: () => meta })(record)`. Raise upstream: make `captureRequestMeta` async-capable.
+
+- **[2026-10-01]** `next-env.d.ts` dirties the tree and made checkpoints skip the upgrade dry-run
+  - **Symptom**: `next dev` and `next build` write different `next-env.d.ts` contents; the tracked file flipped, `checkpoint.sh` saw a dirty tree and SKIPPED `aiden upgrade --dry-run`.
+  - **Fix**: Untrack + gitignore it (guarded in `checkpoint.sh` and `verify.sh`). `aiden upgrade --dry-run` itself works on a dirty tree, so `checkpoint.sh` now always runs it and only fails *afterwards* on a dirty tree (recording `tree=`/`head=`), so a safety check is never silently skipped.

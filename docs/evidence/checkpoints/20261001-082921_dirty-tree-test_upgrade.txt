@@ -1,0 +1,11 @@
+head: 3b36cbe
+tree: dirty(2)
+uncommitted:
+ M scripts/checkpoint.sh
+ M scripts/verify.sh
+
+aiden upgrade (dry-run)
+
+Current version: 2.0.1
+Target version:  2.0.1
+✓ Already up to date.

@@ -12,3 +12,4 @@
 [2026-10-01 00:20] completed security(review): security review on main (base cb9cd15) — FAIL (2 HIGH by rule: F1 full ticket row in GET /api/tickets/[id], F2 hard-coded seed password; 0 dependency vulns)
 [2026-10-01 00:30] completed security(review): re-run after fixes on main (58b360b) — PASS
 [2026-10-01 00:50] completed chore(verify): Phase 6 — verify.sh 0 fails (asserted exceptions), injection probe 0/18, model switch + kill-switch + jsonl sink, prod build/headers/smoke, security review PASS after fixes, rollback rehearsal on throwaway branch, plan record + deviations 19–24, Studio PNGs + 55-row trace
+[2026-10-01 08:29] completed fix(checkpoint): next-env.d.ts guarded as untracked/ignored; upgrade dry-run never skipped on dirty tree — build+dev leave tree clean, guards proven
