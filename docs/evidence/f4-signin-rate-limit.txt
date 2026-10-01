@@ -1,0 +1,23 @@
+# F4 proof 2026-10-01 10:32:43 — production server (next start), aiden_rerun
+
+| Check | Expected | Got | |
+|---|---|---|---|
+| IP A: attempts 1-10 reach Auth.js (302) | 302 302 302 302 302 302 302 302 302 302  | 302 302 302 302 302 302 302 302 302 302  | ok |
+| IP A: attempt 11 (no JS header) → 303 to /login?error=RateLimited | 303 /login?error=RateLimited&code=rate_limited | 303 /login?error=RateLimited&code=rate_limited | ok |
+| IP A: attempt 12 from signIn() (X-Auth-Return-Redirect) → 429 + Auth.js JSON | 429 RateLimited | 429 RateLimited | ok |
+| IP A: Retry-After header present | yes | yes | ok |
+| IP A: even the right password is held back while limited | 429 | 429 | ok |
+| IP B (different client): unaffected, right password signs in | 302 | 302 | ok |
+| account viewer@globex.test: 20 attempts from 20 IPs reach Auth.js | 302302302302302302302302302302302302302302302302302302302302 | 302302302302302302302302302302302302302302302302302302302302 | ok |
+| account viewer@globex.test: attempt 21 from a fresh IP → 429 | 429 | 429 | ok |
+| account key ignores case/whitespace (VIEWER@Globex.test ) | 429 | 429 | ok |
+| other accounts from those IPs unaffected | 302 | 302 | ok |
+| GET /api/auth/session from limited IP A | 200 | 200 | ok |
+| POST /api/auth/signout from limited IP A (not limited) | 302 | 302 | ok |
+
+== 12 passed, 0 failed
+
+## Real login form (SDK LoginForm) in a browser
+agent2@acme.test: callback HTTP 200 | toast: Invalid email or password | submit enabled again: true | page: /login
+viewer@globex.test: callback HTTP 429 | toast: Invalid email or password | submit enabled again: true | page: /login
+page errors: none

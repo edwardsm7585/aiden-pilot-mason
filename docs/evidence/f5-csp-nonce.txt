@@ -1,0 +1,49 @@
+# F5 proof 2026-10-01 10:34:03 — production server (next start), aiden_rerun
+
+/login: HTTP 200, <script> tags 20, carrying this request's nonce 20
+/register: HTTP 200, <script> tags 20, carrying this request's nonce 20
+/dashboard/tickets: HTTP 307, <script> tags 9, carrying this request's nonce 9
+/does-not-exist: HTTP 404, <script> tags 19, carrying this request's nonce 19
+
+script-src: script-src 'self' 'nonce-<per request>' 'strict-dynamic'
+nonce differs per request: yes
+routes prerendered as static (nonce impossible): 0
+
+## Other SDK headers (unchanged)
+permissions-policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+
+## Browser: normal use under the nonce CSP
+clean page load violations: /login []
+clean page load violations: /dashboard []
+signed in via form -> /dashboard
+draft streamed: chars = 838
+dark class applied before hydration script ran: true
+CSP violations during normal use (steps 1-3): none
+page errors: none
+
+## XSS vectors: before vs after
+## previous CSP ('unsafe-inline', before this fix)
+(Same pages, CSP header swapped back to the pre-fix policy. Its "script-src" reports are Zod's eval probe, captured before src/instrumentation-client.ts set jitless; they are not from the vectors.)
+script-src 'self' 'unsafe-inline'
+| Vector | Ran? | CSP report |
+|---|---|---|
+| injected HTML event handler (<img onerror>) | **ran** | script-src |
+| parser-inserted inline <script> | **ran** | script-src |
+| javascript: URL | **ran** | script-src |
+| script created by already-running JS | **ran** | script-src |
+
+## nonce CSP (this fix)
+script-src 'self' 'nonce-YzQyNmJkOTAtMTZjYi00ZjdhLWFiMTMtZGU0YTI3Y2IzOTgx' 'strict-dynamic'
+| Vector | Ran? | CSP report |
+|---|---|---|
+| injected HTML event handler (<img onerror>) | blocked | script-src-attr |
+| parser-inserted inline <script> | blocked | - |
+| javascript: URL | blocked | script-src-elem |
+| script created by already-running JS | **ran** | - |
+
+The last row needs code already running on the page, which 'strict-dynamic' deliberately trusts; it is not an injection point. The first three are how injected HTML would execute, and are now blocked.

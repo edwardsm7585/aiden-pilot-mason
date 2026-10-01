@@ -27,5 +27,8 @@ Captured with headless Chrome using real credential sign-ins (`authjs.session-to
 | `24-owner-last-owner-refused.png` | owner | Demoting the last owner → 409 explained; the Select reverts to Owner |
 | `25-delete-account-dialog.png` | owner | Delete-account dialog: says tickets you own move to an org owner (F3 fix) |
 | `26-sole-owner-delete-refused.png` | owner | Sole owner tries to delete their account → 409; the toast gives the reason and the next step (F3 fix) |
+| `27-csp-nonce-draft-works.png` | agent1 | Streamed AI draft on the production build under the nonce CSP, with 0 CSP violations (F5) |
+| `28-login-wrong-password-toast.png` | (signed out) | Wrong password: the toast now appears (no Toaster on auth pages before) |
+| `29-login-rate-limited.png` | (signed out) | Sign-in after the per-account limit: 429, form stays usable; SDK form's generic text (F4) |
 
 DB state and request traces after these runs: `../db-phase5/`.

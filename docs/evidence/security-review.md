@@ -115,13 +115,45 @@ Every claim above was re-verified against the current code and live requests, wi
     - Serialization conflicts arrive in two shapes with the pg adapter (P2034, or a bare `DriverAdapterError` "TransactionWriteConflict" at commit); `src/lib/db-errors.ts` recognises both, so a race returns 409 rather than 500. A first version missed the second shape; the forced-overlap test caught it.
     - The delete dialog now says tickets move to an org owner and shows the server's reason on refusal (`screenshots/ui/25-…`, `26-…`).
     - Verified (`f3-account-deletion.txt`): agent deletion keeps the ticket under the owner; sole owner 409 with nothing changed; raw SQL delete refused by the FK; concurrent owner deletions leave exactly one owner and no lost tickets; 6/6 forced-overlap rounds end with one change applied and one 409. Regression: smoke 7/7, extended matrix 37/37.
-- **F4 [MEDIUM] Auth — credentials sign-in is not rate-limited** (starter/SDK): 20 wrong-password attempts in a row were all processed, with no lockout or 429. The demo accounts use a 24-character random password, so they aren't guessable, but real user passwords could be brute-forced. Fix: rate-limit `POST /api/auth/callback/credentials` (raise upstream in `aiden-auth`/`aiden-security`; `verify.sh` E1 currently requires the NextAuth route to only re-export handlers).
+- **F4 [MEDIUM] Auth — credentials sign-in is not rate-limited** (starter/SDK): 20 wrong-password attempts in a row were all processed, with no lockout or 429. The demo accounts use a 24-character random password, so they aren't guessable, but real user passwords could be brute-forced. Fix: rate-limit `POST /api/auth/callback/credentials`.
+  - **Status:** Resolved. `src/app/api/auth/[...nextauth]/route.ts` wraps Auth.js's `POST` in the SDK's `withRateLimit` twice, for credentials sign-in only:
+    - 10 attempts a minute per IP;
+    - 20 attempts in 15 minutes per account (email, case- and space-insensitive), which stops a slow or distributed attack on one account without locking out a user who makes a few typos.
+    - Sign-out, session and OAuth POSTs are not limited, and `GET` is the plain Auth.js handler.
+    - The 429 is answered in Auth.js's own shape (`{ url: "/login?error=RateLimited" }`, or a 303 for non-JS posts), so the login form neither throws nor hangs. `Retry-After` is kept.
+    - `verify.sh` E1 now asserts all of this.
+    - **Bugs found while proving it:**
+      - The SDK's `withRateLimit` mutates the handler's response headers, and Auth.js's failed-sign-in redirect has immutable headers. Every wrong password became a **500**. Fixed by handing it a mutable copy; recorded for upstream in `.claude/fixes/aiden-security.md`.
+      - The auth pages never mounted a `<Toaster />`, so even a plain wrong password showed **no message**. It is now mounted once at the root, per DS 07.
+    - Verified on the production server (`f4-signin-rate-limit.txt`): 12/12 checks, plus the real login form in a browser. A wrong password shows its toast; a rate-limited attempt gets a 429, the form stays usable, and there are no page or server errors.
+    - **Residual (upstream):**
+      - A rate-limited user sees the SDK form's generic "Invalid email or password", because `LoginForm` ignores `result.code`.
+      - The per-IP key trusts `X-Forwarded-For`, so deploy behind a proxy that sets it; the per-account limit holds either way.
+      - The in-memory store is per instance; multi-instance deploys need a shared `RateLimitStore`.
 - **F5 [MEDIUM] Defence in depth — production CSP allows `script-src 'unsafe-inline'`** (Next's inline bootstrap scripts need it without nonces). There are no XSS sinks in the code, so nothing is exploitable today, but the CSP wouldn't stop an injected inline script. Fix: nonce-based CSP via `proxy.ts` (upstream `securityHeaders` option).
+  - **Status:** Resolved. `src/proxy.ts` follows Next 16's CSP guide:
+    - A fresh nonce on every request: `script-src 'self' 'nonce-…' 'strict-dynamic'`, with no `'unsafe-inline'`. `'unsafe-eval'` is dev-only.
+    - The SDK's `securityHeaders({ csp: false })` still sets HSTS, X-Frame-Options, nosniff, Referrer-Policy and Permissions-Policy.
+    - The root layout reads `x-nonce` and passes it to next-themes. This also makes every route dynamic (build shows 0 static routes), which nonces require.
+    - `src/instrumentation-client.ts` sets Zod's `jitless` mode, so its eval probe no longer raises a CSP violation on every page.
+    - `verify.sh` asserts the nonce and fails on `unsafe-inline` in `script-src`.
+    - Verified on the production server (`f5-csp-nonce.txt`):
+      - every `<script>` on every page carries that request's nonce, and the nonce changes per request;
+      - **0 CSP violations** across a clean load, form sign-in, a streamed draft and dark mode;
+      - injected-HTML XSS vectors (`<img onerror>`, a parser-inserted `<script>`, a `javascript:` URL) **ran under the old policy and are blocked now**.
+    - Trade-offs:
+      - `style-src` keeps `'unsafe-inline'`, because Radix and sonner set inline style attributes, which nonces can't cover. Style injection can't run script.
+      - `/login` and `/register` now render per request instead of being prerendered.
+      - Phase 6's `headers.txt` shows the earlier policy and is kept as history.
 
 ### Verdict (re-check, initial): FAIL
 
 F3 was a HIGH access-control finding, so the gate failed until F3 was fixed.
 
-### Verdict (after the F3 fix): **PASS**
+### Verdict (after the F3 fix): PASS
 
-No CRITICAL or HIGH findings remain open. F4 (no sign-in rate limit) and F5 (CSP `unsafe-inline`) are MEDIUM, so under this skill's rules they are reported but don't block. Both are SDK-level and recorded for upstream. Everything else in the original report is confirmed.
+No CRITICAL or HIGH findings remained; F4 and F5 (MEDIUM) were still open.
+
+### Verdict (after the F4 and F5 fixes): **PASS, no open findings**
+
+F1, F2, F2a, F3, F4 and F5 are all resolved and verified. The residual items listed under F4 and F5 are deployment notes and upstream SDK requests, not open findings in this app. Regression on the production build: smoke 7/7, extended matrix 37/37, dashboard toast flows intact, `verify.sh` 0 failing checks, `tsc` and lint clean.

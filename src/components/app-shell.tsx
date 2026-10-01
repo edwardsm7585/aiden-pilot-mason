@@ -3,7 +3,6 @@ import type { Session, User } from "next-auth";
 import {
   DashboardHeader,
   DashboardNav,
-  Toaster,
   type DashboardNavItem,
 } from "@upstart13-com/aiden-ui";
 import { abilities } from "@/lib/abilities";
@@ -62,7 +61,6 @@ export async function AppShell({ session, children }: AppShellProps) {
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
-      <Toaster />
     </div>
   );
 }

@@ -4,8 +4,9 @@
 #
 # Exceptions are explicit and themselves asserted, so they can't silently
 # cover new code. Each is documented where it's applied:
-#   E1  Public routes without withAuth: NextAuth's own handler and the public
-#       register endpoint (rate-limited). Asserted below.
+#   E1  Public routes without withAuth: NextAuth's own handler (credentials
+#       sign-in rate-limited, finding F4) and the public register endpoint
+#       (rate-limited). Asserted below.
 #   E2  Pages without a direct PageHeader: the public marketing page, the
 #       redirect-only /dashboard page, and settings pages whose PageHeader is
 #       rendered once by settings/layout.tsx (DS 08 "Settings Page" pattern).
@@ -20,7 +21,9 @@ chk(){ out=$(eval "$2" 2>/dev/null); if [ -n "$out" ]; then echo "FAIL: $1"; ech
 # ── Perimeter ────────────────────────────────────────────────────────────────
 PUBLIC_ROUTES='src/app/api/auth/\[\.\.\.nextauth\]/route.ts|src/app/api/auth/register/route.ts'
 chk "route without withAuth (E1 excluded)" 'grep -rLE "withAuth" src/app/api --include=route.ts | grep -vE "^($PUBLIC_ROUTES)$"'
-chk "E1: nextauth route only re-exports handlers" 'grep -vE "^\s*$|^import \{ handlers \} from \"@/lib/auth\";$|^export const \{ GET, POST \} = handlers;$" "src/app/api/auth/[...nextauth]/route.ts"'
+NA="src/app/api/auth/[...nextauth]/route.ts"
+chk "E1: nextauth GET is the plain Auth.js handler" 'grep -q "^export const { GET } = handlers;" "$NA" || echo "GET changed"'
+chk "E1: nextauth POST rate-limits credentials sign-in (F4)" 'grep -q "withRateLimit(" "$NA" || echo "lost withRateLimit"; grep -q "/callback/credentials" "$NA" || echo "lost the credentials-callback match"; grep -q "handlers.POST(" "$NA" || echo "POST no longer delegates to Auth.js"'
 chk "E1: register route is rate-limited" 'grep -q "withRateLimit(" src/app/api/auth/register/route.ts || echo "register route lost withRateLimit"'
 chk "raw req.json()"                      'grep -rn "req\.json()" src'
 chk "inline owner comparison"             'grep -rnE "(userId|ownerId)\s*===" src/app'
@@ -57,5 +60,11 @@ chk ".env committed"                      'git log --all --name-only --format= |
 chk "API key pattern in tracked files"    'git grep -nIE "sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{40,}|ghp_[A-Za-z0-9]{30,}" -- . ":!*.md"'
 chk "live SEED_PASSWORD in tracked files"  'v=$(sed -n "s/^SEED_PASSWORD=\"\{0,1\}\([^\"]*\)\"\{0,1\}\r\{0,1\}$/\1/p" .env.local 2>/dev/null); [ -z "$v" ] || git grep -nIF -e "$v" -- . | cut -d: -f1,2'
 chk "next-env.d.ts tracked or not ignored" '{ git ls-files --error-unmatch next-env.d.ts >/dev/null 2>&1 && echo "next-env.d.ts is tracked"; git check-ignore -q --no-index next-env.d.ts || echo "next-env.d.ts is not gitignored"; } 2>/dev/null'
-chk "schema.prisma hand-edited"          'git log --format=%s -- prisma/schema.prisma | grep -viE "merge|generate|init|scaffold"'
+# Compare against a fresh merge rather than guessing from commit messages.
+MERGED="${TMPDIR:-/tmp}/verify-merged-schema.prisma"
+chk "schema.prisma differs from merged fragments" 'npx --no-install aiden-db-merge-schema --base prisma/fragments/_base.prisma --fragments "prisma/fragments/*.prisma" --fragments "pkg:@upstart13-com/aiden-db/schema/*.prisma" --exclude "prisma/migrations/**" --output "$MERGED" >/dev/null 2>&1 || echo "merge failed"; diff <(tr -d "\r" < "$MERGED") <(tr -d "\r" < prisma/schema.prisma) >/dev/null || echo "prisma/schema.prisma is not the merge of prisma/fragments: edit fragments, then npm run prisma:merge"'
+
+# ── Headers ──────────────────────────────────────────────────────────────────
+chk "CSP script-src not nonce-based (F5)" 'grep -q "script-src .*nonce-" src/proxy.ts || echo "script-src lost its nonce"; grep -nE "script-src[^;\"]*unsafe-inline" src/proxy.ts'
+chk "root layout lost the CSP nonce (F5)" 'grep -q "x-nonce" src/app/layout.tsx || echo "x-nonce not read in layout"; grep -q "nonce={nonce}" src/app/layout.tsx || echo "nonce not passed to ThemeProvider"'
 echo "== $fails failing checks"; [ "$fails" -eq 0 ]

@@ -23,3 +23,10 @@
 - **[2026-10-01]** `next-env.d.ts` dirties the tree and made checkpoints skip the upgrade dry-run
   - **Symptom**: `next dev` and `next build` write different `next-env.d.ts` contents; the tracked file flipped, `checkpoint.sh` saw a dirty tree and SKIPPED `aiden upgrade --dry-run`.
   - **Fix**: Untrack + gitignore it (guarded in `checkpoint.sh` and `verify.sh`). `aiden upgrade --dry-run` itself works on a dirty tree, so `checkpoint.sh` now always runs it and only fails *afterwards* on a dirty tree (recording `tree=`/`head=`), so a safety check is never silently skipped.
+
+- **[2026-10-01]** Nonce CSP needs every page dynamic, and Zod 4 trips `script-src` on every page
+  - **Symptom 1**: with a nonce CSP, `/login`, `/register` and `/_not-found` were prerendered static, so their scripts would carry no nonce and hydration would be blocked.
+  - **Fix 1**: the root layout reads `(await headers()).get("x-nonce")` (passed to next-themes' `ThemeProvider nonce`), which also makes every route dynamic. Build output must show 0 `○` routes. Guide: `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`.
+  - **Symptom 2**: a `script-src` `securitypolicyviolation` (blockedURI `eval`) on every page load, from Zod 4's `allowsEval` probe in a client chunk. Harmless (try/catch, falls back) but noisy.
+  - **Fix 2**: `src/instrumentation-client.ts` → `z.config({ jitless: true })`.
+  - **Test note**: `'strict-dynamic'` trusts scripts created by already-running JS; test CSP with injected-HTML vectors (`<img onerror>`, parser-inserted `<script>`, `javascript:` URLs), not `createElement` from page code.

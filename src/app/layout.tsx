@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "@upstart13-com/aiden-ui";
 import { ThemeProvider } from "@upstart13-com/aiden-ui/layout/theme-provider";
 import { aidenConfig } from "@/../aiden.config";
 import { brand } from "@/config/brand";
@@ -23,11 +25,14 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_DESCRIPTION ?? aidenConfig.app.description,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Per-request CSP nonce from src/proxy.ts (security finding F5). Reading
+  // headers() also makes every page render per request, which nonces need.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html
       lang="en"
@@ -35,7 +40,11 @@ export default function RootLayout({
       className={`${interSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-background text-foreground antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider nonce={nonce}>
+          {children}
+          {/* Once, at the root (DS 07): auth pages need it for sign-in errors. */}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

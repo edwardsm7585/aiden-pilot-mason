@@ -13,3 +13,7 @@
   - **Root cause**: In Tailwind v4, `@utility` declarations are placed inside `@layer utilities`. For the built-in `container` utility, `margin` and `padding` overrides are silently ignored — only `max-width` takes effect.
   - **Fix**: Keep `@utility container { max-width: 1280px }` and add plain un-layered CSS in `globals.css` (outside any `@layer`): `.container { margin-left: auto; margin-right: auto; padding-left: 1.5rem; padding-right: 1.5rem }` with responsive media queries. Un-layered CSS wins over all `@layer` declarations in the cascade.
   - **Prevention**: Never use `@utility` alone to configure container centering/padding in Tailwind v4. Always pair with un-layered CSS overrides. See `docs/design-system/01-foundations.md` Container section.
+
+- **[2026-10-01]** No `<Toaster />` on auth pages: sign-in errors were invisible
+  - **Symptom**: the SDK `LoginForm` calls `toast.error("Invalid email or password")`, but nothing appeared on `/login`; the starter mounted `<Toaster />` only in the dashboard shell.
+  - **Fix**: mount it once in `src/app/layout.tsx` (DS 07: "Mount the themed `<Toaster />` once in your root layout") and remove the shell's copy.
