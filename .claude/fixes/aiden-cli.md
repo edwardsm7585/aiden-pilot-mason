@@ -14,3 +14,8 @@
 - **[2026-10-01]** `aiden doctor` exits 0 when osv-scanner is missing (CVE scan silently skipped)
   - **Symptom**: doctor prints `! osv-scanner not on PATH` as a warning and still exits 0, so checkpoints read green without a CVE scan (happened when a shell didn't inherit the winget PATH entry).
   - **Fix**: `scripts/checkpoint.sh` adds a winget `Google.OSVScanner_*` dir to PATH if needed and treats the warning as a red doctor (`doctor=4`). Raise upstream: a missing required scanner should fail doctor.
+
+- **[2026-10-01]** `aiden migrate` exits 0 without migrating (Windows)
+  - **Symptom**: empty DB → `aiden migrate` prints nothing, exit 0, 0 tables.
+  - **Root cause**: `spawnSync("npx", …)` without a shell → ENOENT on Windows (`npx.cmd`); `process.exit(r.status ?? 0)` treats the null status of a failed spawn as success.
+  - **Fix**: on Windows run `npx prisma migrate deploy` (what it wraps). Upstream item 16 in `docs/upstream-sdk-issues.md`.

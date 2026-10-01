@@ -8,12 +8,12 @@
 | Next.js          | `nextjs.md`           | 9       | 0 of 9                 | 2026-10-01   | Watch  |
 | UI/Frontend      | `ui.md`               | 7       | 3 of 7                 | 2026-10-01   | Watch  |
 | Prisma           | `prisma.md`           | 5       | 1 of 5                 | 2026-10-01   | Watch  |
-| aiden-cli        | `aiden-cli.md`        | 3       | 0 of 3                 | 2026-10-01   | New    |
+| aiden-cli        | `aiden-cli.md`        | 4       | 0 of 4                 | 2026-10-01   | New    |
 | aiden-ai         | `aiden-ai.md`         | 3       | 0 of 3                 | 2026-09-30   | New    |
 | aiden-security   | `aiden-security.md`   | 4       | 0 of 4                 | 2026-10-01   | New    |
 | aiden-auth       | `aiden-auth.md`       | 1       | 0 of 1                 | 2026-10-01   | New    |
 
-**Total: 35 active entries across 8 categories · 6 structurally prevented**
+**Total: 36 active entries across 8 categories · 6 structurally prevented**
 
 These entries ship with the AIDEN starter template — they are universal gotchas observed across customer apps (Tailwind v4, Prisma 7, Next.js App Router, TypeScript). Add your own as they come up.
 

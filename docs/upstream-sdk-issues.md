@@ -1,6 +1,6 @@
 # AIDEN SDK and starter: issues found while building DeskLine
 
-These defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
+These 16 defects were found in `@upstart13-com/aiden-*` 2.0.1 and the `aiden init` starter while building and verifying DeskLine (2026-09-30 → 10-01). Each one has a local workaround in this repo, so DeskLine is unaffected. Each also belongs upstream, so the fix reaches every AIDEN app through `aiden upgrade` (CLAUDE.md: "raise gaps upstream"). The full investigation notes are in `.claude/fixes/`.
 
 They are ordered by impact; security-relevant ones come first.
 
@@ -112,3 +112,10 @@ if (result?.error) {
 - **Seed:** `package.json` `"prisma": { "seed" }` is ignored by Prisma 7. Workaround: `migrations.seed` in `prisma.config.ts`.
 - **`next-env.d.ts`:** `next dev` and `next build` write it differently, which dirties the tree. Workaround: untracked and gitignored.
 - **Starter role toggles:** the Admin → Users toggles are raw `<button>`s with no focus ring or `aria-pressed`. Fixed locally with `Button` and the DS violet pill.
+
+### 16. aiden-cli · `aiden migrate` silently does nothing on Windows, and exits 0
+
+- **Symptom:** on an empty database, `npx @upstart13-com/aiden-cli migrate` prints nothing, exits **0**, and creates **0 tables**.
+- **Cause:** `spawnSync("npx", ["prisma", "migrate", "deploy", …], { stdio: "inherit" })` without a shell. On Windows `npx` is `npx.cmd`, so the spawn fails with `ENOENT` and `r.status` is `null`. The command then exits `r.status ?? 0`, which turns a failed spawn into success. Same family as item 8, but worse, because it reports success.
+- **Workaround:** the README tells Windows users to run `npx prisma migrate deploy` directly, which applies all three migrations (13 tables). On Linux CI and production hosts, `aiden migrate` works as intended.
+- **Proposed fix:** `shell: process.platform === "win32"` and `process.exit(r.status ?? 1)`, so a spawn that never ran is a failure, never a pass.

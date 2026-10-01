@@ -254,7 +254,9 @@ Events are emitted with `auditLog()` from `@/lib/security`. `timestamp`, `reques
 | `scripts/smoke.sh`, `scripts/verify.sh` | **new**: the Phase 6 suites |
 | `.gitignore` | add `.audit/` |
 | `docs/evidence/**` | checkpoint and verification evidence |
-| `README.md` | run, seed logins, provider switch, audit sink, verify |
+| `README.md` | run, seed logins, provider switch, audit sink, verify (Phase 7; also evidence index and known limitations) |
+| `scripts/smoke-local.sh` | **new** (Phase 7): signs in the seeded agent/viewer with `SEED_PASSWORD` and runs `smoke.sh` in one command |
+| `docs/upstream-sdk-issues.md` | **new**: 16 SDK/starter defects with workarounds and proposed fixes |
 
 Ticket pages live under the starter's existing `src/app/dashboard/` segment, so they reuse its auth redirect, `DashboardNav` and `PageHeader` layout. Their URL is `/dashboard/tickets`, not the runbook sketch's `(dashboard)/tickets`.
 

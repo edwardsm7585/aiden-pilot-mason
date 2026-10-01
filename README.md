@@ -1,86 +1,94 @@
-# AIDEN Starter
+# DeskLine — aiden-pilot-mason
 
-A fresh Next.js 16 App Router project wired to every `@upstart13-com/aiden-*` package.
+Repo: https://github.com/edwardsm7585/aiden-pilot-mason
+Scaffolded with `npx @upstart13-com/aiden-cli init aiden-pilot-mason` (first commit, `cb9cd15`, unmodified).
 
-This is a **template**. Use `npx aiden init <my-app>` to clone it; don't run it from `templates/starter` directly.
+DeskLine is a multi-tenant support desk built on the AIDEN SDK (`@upstart13-com/aiden-*` 2.0.1) for the AIDEN Certified — Associate capstone. Agents log customer tickets, AI triages each one (priority, category, sentiment), and agents stream an AI draft reply. Owners manage member roles and see their organisation's audit log and AI cost. Every organisation's data is isolated from every other.
 
-## What's wired
+The approved plan, decisions D1–D7 and all 30 recorded deviations are in [`docs/plans/deskline.md`](docs/plans/deskline.md).
 
-| Concern             | Package                         | File                                                 |
-| ------------------- | ------------------------------- | ---------------------------------------------------- |
-| Auth                | `@upstart13-com/aiden-auth`     | `src/lib/auth.ts`                                    |
-| Database            | `@upstart13-com/aiden-db`       | `src/lib/prisma.ts`                                  |
-| Security primitives | `@upstart13-com/aiden-security` | `src/lib/security.ts`                                |
-| Logging + AI usage  | `@upstart13-com/aiden-logging`  | `src/lib/logger.ts`                                  |
-| AI client           | `@upstart13-com/aiden-ai`       | `src/lib/ai.ts`                                      |
-| UI tokens + comps   | `@upstart13-com/aiden-ui`       | `src/lib/styles.css`                                 |
-| Feature flags       | —                               | `aiden.config.ts`                                    |
-| Schema fragments    | `@upstart13-com/aiden-db`       | `prisma/fragments/*.prisma` + `aiden-db.config.json` |
+## Run
 
-## Getting started
+Needs Node 24, PostgreSQL 16 and `osv-scanner` on PATH (`aiden doctor` runs it).
 
-```bash
-# 1. Install
-npm install
+1. `cp .env.example .env.local`, then set:
+   - `DATABASE_URL`;
+   - `AUTH_SECRET` (`openssl rand -base64 32`);
+   - `ANTHROPIC_API_KEY`;
+   - `SEED_PASSWORD` (12+ characters; the password for every demo account).
 
-# 2. Set up env (copy and fill in DATABASE_URL + AUTH_SECRET at minimum)
-cp .env.example .env.local
-# Generate AUTH_SECRET:  openssl rand -base64 32
+   No `OPENAI_API_KEY` is needed: only Anthropic is enabled (deviation 19).
 
-# 3. Spin up Postgres locally (any way you like)
-docker compose up -d   # if you ship one
+2. `npm install`
+3. `npx aiden-db-merge-schema` composes `prisma/fragments/*.prisma` into `prisma/schema.prisma`.
+4. Apply migrations:
+   - **Dev:** `npm run db:migrate`.
+   - **CI or production:** `npx @upstart13-com/aiden-cli migrate` (wraps `prisma migrate deploy`).
+   - **On Windows, use `npx prisma migrate deploy` instead.** `aiden migrate` 2.0.1 can't start `npx` there, but still exits 0 having done nothing ([upstream issue 16](docs/upstream-sdk-issues.md)).
+5. `npm run db:seed` creates the two demo organisations and prints the ticket ids the smoke suite uses.
+6. `npx @upstart13-com/aiden-cli doctor` should exit 0 with all 5 checks green, including the CVE scan.
+7. `npm run dev`, then open http://localhost:3000.
 
-# 4. Generate Prisma client (composes fragments + runs prisma generate)
-npm run prisma:generate
+For production, run `npm run build && npm start` and set `AUTH_URL` (or `AUTH_TRUST_HOST=true` behind a trusted proxy). Auth.js rejects untrusted hosts in production.
 
-# 5. Run migrations
-npm run db:migrate
+## Seeded logins
 
-# 6. Dev
-npm run dev
-```
+The password for every account is the `SEED_PASSWORD` you set in `.env.local`. It is never committed. The seed refuses a password shorter than 12 characters and skips demo accounts when `NODE_ENV=production`.
 
-Visit <http://localhost:3000>:
+| Email                | Organisation | Role   | Can                                                                  |
+| -------------------- | ------------ | ------ | -------------------------------------------------------------------- |
+| `owner@acme.test`    | Acme         | owner  | everything in Acme: all tickets, drafts, Members, Audit log, AI cost |
+| `agent1@acme.test`   | Acme         | agent  | create, edit, close and draft replies for **their own** tickets      |
+| `agent2@acme.test`   | Acme         | agent  | same, for their own tickets (agent1's tickets are a 404)             |
+| `viewer@acme.test`   | Acme         | viewer | read every Acme ticket; no create, edit, close or draft              |
+| `owner@globex.test`  | Globex       | owner  | everything in Globex; nothing in Acme                                |
+| `agent@globex.test`  | Globex       | agent  | their own Globex tickets                                             |
+| `viewer@globex.test` | Globex       | viewer | read Globex tickets                                                  |
 
-- `/` — landing
-- `/login`, `/register` — auth flows powered by `aiden-auth/components`
-- `/dashboard` — protected route showing the auth session
+Ticket `cdeskline0ticket0a4` contains a prompt-injection attempt, kept for the injection probe.
 
-## Environment variables
+## Switch AI provider
 
-`.env.example` is the single source of truth for environment variables — copy it to `.env.local` and fill in the values you need:
+Change **one line** in `aiden.config.ts`: `ai.active` (line 92). `src/lib/ai.ts` builds the single client from `ai.active` and `ai.models[active]`, so no route changes are needed. Restart the server afterwards.
 
-```bash
-cp .env.example .env.local
-```
+- The target provider must also be enabled (`ai.providers.<name>: true`, lines 84–89) with its API key set, because `aiden doctor` checks for the key. Only Anthropic is enabled today, so a switch to OpenAI also flips line 84 and adds `OPENAI_API_KEY`.
+- **Model switch:** `ai.models.anthropic` (line 96), proven in `docs/evidence/provider-switch.md`.
+- **AI kill-switch:** set `ai.providers.anthropic: false` (line 85). Tickets still save, without triage, and drafts return 503.
 
-At minimum, set `DATABASE_URL` and `AUTH_SECRET`. OAuth and AI provider keys are only needed when you enable the matching provider in `aiden.config.ts`. Stripe and SendGrid keys are only needed when you turn billing/email on (see "Stripe + SendGrid" below).
+## Audit sink
 
-`aiden doctor` validates the keys you actually need based on `aiden.config.ts`.
+`AUDIT_SINK=jsonl npm run dev` writes audit events to `.audit/audit.jsonl` (gitignored) instead of the `audit_logs` table. To send them somewhere else, register a sink with `setAuditSink()` in `src/lib/audit.ts`.
 
-## Schema fragments
+Retention and archival are customer-owned (D7). By default, `AuditLog` rows stay in Postgres indefinitely, and no DeskLine code deletes them, including on account deletion and feature rollback. Details and the open owner decision: [`docs/audit-retention.md`](docs/audit-retention.md).
 
-`prisma/schema.prisma` is generated by `aiden-db-merge-schema` from:
+## Verify
 
-- `prisma/fragments/_base.prisma` — datasource + generator
-- `prisma/fragments/user.prisma` — your User model (must declare `accounts Account[]` and `sessions Session[]`)
-- `pkg:@upstart13-com/aiden-db/schema/*.prisma` — Account, Session, VerificationToken (NextAuth bookkeeping)
+| Command                                                      | What it does                                                                                                                                                                             |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bash scripts/smoke-local.sh`                                | Signs in the seeded agent and viewer with `SEED_PASSWORD`, then runs the graded perimeter suite (`scripts/smoke.sh`, 7 probes). Needs a running server and a fresh seed                  |
+| `bash scripts/smoke.sh`                                      | Same suite, with cookies and ids exported by hand (see the script header)                                                                                                                |
+| `bash scripts/verify.sh`                                     | Convention and security sweep, including perimeter, no-ship sinks, secrets, design-system rules, CSP, formatting and schema drift. Named exceptions E1–E4 are asserted, not just skipped |
+| `bash scripts/checkpoint.sh <label>`                         | `aiden doctor` plus `aiden upgrade --dry-run`. It never skips either check, and it fails on a skipped CVE scan or a dirty tree. History is in `docs/evidence/checkpoints/LOG.md`         |
+| `npx tsc --noEmit`, `npm run lint`, `npx prettier --check .` | Type check, lint and formatting                                                                                                                                                          |
+| CI: `.github/workflows/security.yml`                         | osv-scanner and `npm audit` on every push and pull request, and weekly                                                                                                                   |
 
-Add your own fragments to `prisma/fragments/` and rerun `npm run prisma:merge` (it's also part of `db:migrate`, `db:push`, `prisma:generate`, and the `build` script).
+## Evidence
 
-## Stripe + SendGrid
+| Where                                                                                    | What                                                                                         |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`docs/evidence/rerun-2026-10-01b/`](docs/evidence/rerun-2026-10-01b/README.md)          | **Latest full re-run of Phases 0–6**, every suite on fresh databases                         |
+| [`docs/evidence/security-review.md`](docs/evidence/security-review.md)                   | `/security-review`: findings F1–F5, each fixed and verified. Verdict: PASS, no open findings |
+| [`docs/evidence/security-guide-checklist.md`](docs/evidence/security-guide-checklist.md) | Every section of the AIDEN security guide against the code                                   |
+| [`docs/evidence/design-system-checklist.md`](docs/evidence/design-system-checklist.md)   | Every design-system rule against the UI                                                      |
+| [`docs/evidence/injection-probe.md`](docs/evidence/injection-probe.md)                   | Formal prompt-injection probe: 0 of 18 calls followed                                        |
+| [`docs/evidence/rollback-rehearsal.md`](docs/evidence/rollback-rehearsal.md)             | Rollback (plan §7) rehearsed on a throwaway branch and database                              |
+| `docs/evidence/screenshots/`                                                             | UI for every persona, plus Prisma Studio tables and request traces per phase                 |
+| `docs/evidence/checkpoints/`                                                             | Every `aiden doctor` and upgrade dry-run, with a note explaining any non-green run           |
 
-Stripe (billing) and SendGrid (email) live in the starter rather than as separate AIDEN packages — they're integration glue you own and customize, not shared infrastructure. To enable:
+## Known limitations
 
-- Stripe: implement `src/lib/stripe.ts` and add `/api/stripe/checkout` + `/api/stripe/webhook` routes. Toggle `billing.enabled = true` in `aiden.config.ts`.
-- SendGrid: implement `src/lib/email.ts` and pass `onPostRegister` to `createRegisterHandler`. Toggle `email.enabled = true`.
-
-Stripe webhook handlers MUST verify the signature against `STRIPE_SECRET_KEY` / the webhook signing secret before processing the event.
-
-## Upgrading
-
-```bash
-npx aiden upgrade
-```
-
-Reads `aiden.config.ts` to determine your installed AIDEN version, fetches the latest, runs registered codemods, applies migrations, and bumps `package.json`.
+- **Generic sign-in message:** when sign-in is rate-limited, the SDK's `LoginForm` still says "Invalid email or password". It ignores the error code and can't be changed without forking the SDK; a fix is proposed upstream.
+- **Rate-limit scope:** the per-address limits trust `X-Forwarded-For`, so deploy behind a proxy that sets it. The limit store is in memory, per instance; use a shared `RateLimitStore` when running several instances.
+- **Account deletion and AI cost:** deleting an account hands its tickets to an org owner, but deletes that person's AI cost rows.
+- **Open decisions:** the audit retention period is the owner's call, and the reviewer's sign-off on the plan (PR #1) is pending.
+- **SDK and starter defects:** 16 found during the build are listed with workarounds and proposed fixes in [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md).

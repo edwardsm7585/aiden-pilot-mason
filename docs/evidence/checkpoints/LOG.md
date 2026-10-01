@@ -35,3 +35,4 @@ NOTE | 20261001-084600 osv-guard-test | deliberate test: osv-scanner hidden, doc
 20261001-111724 | design-system | doctor=0 | upgrade-dry-run=0 | tree=clean | head=cc75f65
 20261001-114013 | format-upstream | doctor=0 | upgrade-dry-run=0 | tree=clean | head=d501242
 20261001-122522 | rerun-b-phases0-6 | doctor=0 | upgrade-dry-run=0 | tree=clean | head=3d629c9
+NOTE | 20260930-171648, 20260930-172451, 20260930-173244, 20260930-173859, 20260930-173913, 20260930-180537, 20260930-181812, 20260930-181818, 20260930-182811, 20261001-082921, 20261001-082944, 20261001-084600, 20261001-084929, 20261001-101220, 20261001-103631, 20261001-105741, 20261001-111724, 20261001-114013, 20261001-122522 | upgrade dry-run no-op reason: already on the latest published version (current 2.0.1 == target 2.0.1 for every @upstart13-com/aiden-* package, re-checked against the registry 2026-10-01); nothing to upgrade, no codemods or migrations planned
