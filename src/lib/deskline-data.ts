@@ -126,8 +126,7 @@ export async function getOrgUsage(member: Member | null) {
         userId: u.userId,
         email: emailById.get(u.userId) ?? null,
         calls: u._count,
-        tokens:
-          (u._sum.promptTokens ?? 0) + (u._sum.completionTokens ?? 0),
+        tokens: (u._sum.promptTokens ?? 0) + (u._sum.completionTokens ?? 0),
         costUsd: Number(u._sum.costUsd ?? 0),
       }))
       .sort((a, b) => b.costUsd - a.costUsd),

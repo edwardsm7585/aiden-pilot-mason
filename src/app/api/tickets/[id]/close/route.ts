@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  withAuth,
-  assertOwnership,
-  assertCan,
-  auditLog,
-} from "@/lib/security";
+import { withAuth, assertOwnership, assertCan, auditLog } from "@/lib/security";
 import { abilities } from "@/lib/abilities";
 import { prisma } from "@/lib/prisma";
 import {

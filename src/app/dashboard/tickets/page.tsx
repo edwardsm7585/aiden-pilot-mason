@@ -242,7 +242,10 @@ function EmptyTickets({
 function NoOrganisation() {
   return (
     <div>
-      <PageHeader title="Tickets" subtitle="You’re not in an organisation yet." />
+      <PageHeader
+        title="Tickets"
+        subtitle="You’re not in an organisation yet."
+      />
       <div className="px-6 py-8">
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-muted mb-4 rounded-sm p-3">

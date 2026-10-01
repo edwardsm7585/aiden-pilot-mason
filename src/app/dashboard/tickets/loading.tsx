@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, Skeleton } from "@upstart13-com/aiden-ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Skeleton,
+} from "@upstart13-com/aiden-ui";
 
 /** Skeleton matching the ticket list: header, filters, 6-column table, form card. */
 export default function TicketsLoading() {

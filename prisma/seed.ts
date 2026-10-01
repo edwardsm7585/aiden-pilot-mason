@@ -10,12 +10,7 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import {
-  ROLES,
-  PERMISSIONS,
-  type OrgRole,
-} from "../src/config/rbac";
-
+import { ROLES, PERMISSIONS, type OrgRole } from "../src/config/rbac";
 
 const ORGS = [
   { id: "cdeskline0org0acme", name: "Acme" },
@@ -23,13 +18,48 @@ const ORGS = [
 ] as const;
 
 const USERS: { email: string; name: string; orgId: string; role: OrgRole }[] = [
-  { email: "owner@acme.test", name: "Acme Owner", orgId: ORGS[0].id, role: "owner" },
-  { email: "agent1@acme.test", name: "Acme Agent One", orgId: ORGS[0].id, role: "agent" },
-  { email: "agent2@acme.test", name: "Acme Agent Two", orgId: ORGS[0].id, role: "agent" },
-  { email: "viewer@acme.test", name: "Acme Viewer", orgId: ORGS[0].id, role: "viewer" },
-  { email: "owner@globex.test", name: "Globex Owner", orgId: ORGS[1].id, role: "owner" },
-  { email: "agent@globex.test", name: "Globex Agent", orgId: ORGS[1].id, role: "agent" },
-  { email: "viewer@globex.test", name: "Globex Viewer", orgId: ORGS[1].id, role: "viewer" },
+  {
+    email: "owner@acme.test",
+    name: "Acme Owner",
+    orgId: ORGS[0].id,
+    role: "owner",
+  },
+  {
+    email: "agent1@acme.test",
+    name: "Acme Agent One",
+    orgId: ORGS[0].id,
+    role: "agent",
+  },
+  {
+    email: "agent2@acme.test",
+    name: "Acme Agent Two",
+    orgId: ORGS[0].id,
+    role: "agent",
+  },
+  {
+    email: "viewer@acme.test",
+    name: "Acme Viewer",
+    orgId: ORGS[0].id,
+    role: "viewer",
+  },
+  {
+    email: "owner@globex.test",
+    name: "Globex Owner",
+    orgId: ORGS[1].id,
+    role: "owner",
+  },
+  {
+    email: "agent@globex.test",
+    name: "Globex Agent",
+    orgId: ORGS[1].id,
+    role: "agent",
+  },
+  {
+    email: "viewer@globex.test",
+    name: "Globex Viewer",
+    orgId: ORGS[1].id,
+    role: "viewer",
+  },
 ];
 
 const MALICIOUS_BODY =

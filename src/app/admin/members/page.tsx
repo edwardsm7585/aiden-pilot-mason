@@ -24,7 +24,10 @@ export default async function MembersPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/admin/members");
   const member = await getMembership(session.user.id);
-  const scoped = orgSession({ user: { id: session.user.id, roles: [] } }, member);
+  const scoped = orgSession(
+    { user: { id: session.user.id, roles: [] } },
+    member
+  );
   if (!abilities.can(scoped, "member.manage")) redirect("/dashboard/tickets");
 
   const members = await listMembers(member);
@@ -40,7 +43,10 @@ export default async function MembersPage() {
         {members.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted mb-4 rounded-sm p-3">
-              <Users className="text-muted-foreground size-6" strokeWidth={1.5} />
+              <Users
+                className="text-muted-foreground size-6"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="text-base font-semibold">No members yet</h2>
             <p className="text-muted-foreground mt-1 max-w-xs text-sm">

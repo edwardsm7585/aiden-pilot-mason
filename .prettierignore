@@ -1,0 +1,20 @@
+# Generated
+src/generated/
+.next/
+prisma/migrations/
+next-env.d.ts
+
+# Recorded outputs and agent notes: kept verbatim
+docs/evidence/
+.claude/
+.audit/
+
+# Reviewed plan record: formatting churn would bury real changes in review
+docs/plans/
+
+# next dev writes its own block into CLAUDE.md
+CLAUDE.md
+
+# aiden-cli 2.0.1 reads this file with a regex parser and needs its
+# JSON-compatible shape (see .claude/fixes/aiden-cli.md)
+aiden.config.ts

@@ -37,8 +37,7 @@ function eventVariant(event: string) {
 function summarise(metadata: Record<string, unknown> | null): string {
   if (!metadata) return "—";
   const parts = Object.entries(metadata).map(
-    ([k, v]) =>
-      `${k}: ${Array.isArray(v) ? v.join(", ") || "none" : String(v)}`
+    ([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") || "none" : String(v)}`
   );
   return parts.length ? parts.join("; ") : "—";
 }
@@ -47,7 +46,10 @@ export default async function AuditPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/admin/audit");
   const member = await getMembership(session.user.id);
-  const scoped = orgSession({ user: { id: session.user.id, roles: [] } }, member);
+  const scoped = orgSession(
+    { user: { id: session.user.id, roles: [] } },
+    member
+  );
   if (!abilities.can(scoped, "audit.read")) redirect("/dashboard/tickets");
 
   const rows = await listOrgAudit(member);
@@ -62,7 +64,10 @@ export default async function AuditPage() {
         {rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted mb-4 rounded-sm p-3">
-              <ScrollText className="text-muted-foreground size-6" strokeWidth={1.5} />
+              <ScrollText
+                className="text-muted-foreground size-6"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="text-base font-semibold">No activity yet</h2>
             <p className="text-muted-foreground mt-1 max-w-xs text-sm">
@@ -78,14 +83,24 @@ export default async function AuditPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted hover:bg-muted">
-                  <TableHead className="text-foreground font-semibold">Time</TableHead>
-                  <TableHead className="text-foreground font-semibold">Event</TableHead>
-                  <TableHead className="text-foreground font-semibold">Member</TableHead>
-                  <TableHead className="text-foreground font-semibold">Resource</TableHead>
+                  <TableHead className="text-foreground font-semibold">
+                    Time
+                  </TableHead>
+                  <TableHead className="text-foreground font-semibold">
+                    Event
+                  </TableHead>
+                  <TableHead className="text-foreground font-semibold">
+                    Member
+                  </TableHead>
+                  <TableHead className="text-foreground font-semibold">
+                    Resource
+                  </TableHead>
                   <TableHead className="text-foreground hidden font-semibold lg:table-cell">
                     Details
                   </TableHead>
-                  <TableHead className="text-foreground font-semibold">Request</TableHead>
+                  <TableHead className="text-foreground font-semibold">
+                    Request
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -95,7 +110,10 @@ export default async function AuditPage() {
                       {formatDateTime(r.timestamp)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={eventVariant(r.event)} className="font-mono">
+                      <Badge
+                        variant={eventVariant(r.event)}
+                        className="font-mono"
+                      >
                         {r.event}
                       </Badge>
                     </TableCell>

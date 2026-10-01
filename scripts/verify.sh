@@ -62,6 +62,9 @@ chk "E2: redirect-only pages render nothing else" 'for f in $(find src/app -name
 chk "E2: settings layout renders PageHeader" 'grep -q "PageHeader" src/app/dashboard/settings/layout.tsx || echo "settings layout lost PageHeader"'
 
 # ── Repo hygiene ─────────────────────────────────────────────────────────────
+# Formatting standard = the starter's own (Prettier, trailingComma es5; pinned
+# in package.json, configured in .prettierrc.json / .prettierignore).
+chk "Prettier drift (run npx prettier --write .)" 'npx --no-install prettier --list-different . 2>/dev/null'
 chk ".env committed"                      'git log --all --name-only --format= | grep -E "(^|/)\.env" | grep -v "\.example$" | sort -u'
 chk "API key pattern in tracked files"    'git grep -nIE "sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{40,}|ghp_[A-Za-z0-9]{30,}" -- . ":!*.md"'
 chk "live SEED_PASSWORD in tracked files"  'v=$(sed -n "s/^SEED_PASSWORD=\"\{0,1\}\([^\"]*\)\"\{0,1\}\r\{0,1\}$/\1/p" .env.local 2>/dev/null); [ -z "$v" ] || git grep -nIF -e "$v" -- . | cut -d: -f1,2'

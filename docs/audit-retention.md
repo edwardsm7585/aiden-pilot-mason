@@ -4,13 +4,13 @@ The AIDEN SDK leaves audit retention and archival to the app (decision D7). This
 
 ## What is recorded
 
-| Source | Events |
-|---|---|
-| Sign-in and accounts | `auth.signin`, `auth.signout`, `auth.register`, `user.update`, `password.change`, `data.export`, `user.delete` |
-| Access control (automatic) | `security.ownership_failed` (a 404 for something that isn't yours), `security.ability_denied` (a 403) |
-| Tickets | `ticket.create`, `ticket.update`, `ticket.close`, `ticket.reassign` (when an account is deleted) |
-| AI | `ai.classify`, `ai.draft`, `ai.spend_alert` (a user's AI spend crossed `AI_SPEND_ALERT_USD_PER_HOUR` in the last hour) |
-| Administration | `member.role_change`, `roles.assign` |
+| Source                     | Events                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Sign-in and accounts       | `auth.signin`, `auth.signout`, `auth.register`, `user.update`, `password.change`, `data.export`, `user.delete`         |
+| Access control (automatic) | `security.ownership_failed` (a 404 for something that isn't yours), `security.ability_denied` (a 403)                  |
+| Tickets                    | `ticket.create`, `ticket.update`, `ticket.close`, `ticket.reassign` (when an account is deleted)                       |
+| AI                         | `ai.classify`, `ai.draft`, `ai.spend_alert` (a user's AI spend crossed `AI_SPEND_ALERT_USD_PER_HOUR` in the last hour) |
+| Administration             | `member.role_change`, `roles.assign`                                                                                   |
 
 Each row stores the event name, who did it (`actor_id`), what it was about (`resource_id`), a request id that joins the row to its log lines and `ai_usage` rows, the client IP and user agent, a timestamp, and small metadata such as `{ status }` or `{ fields }`. **Ticket text, prompts and AI output are never stored in audit rows.**
 

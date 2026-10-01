@@ -51,7 +51,8 @@ export function NewTicketForm() {
       });
     } catch {
       toast.error("Couldn’t create the ticket", {
-        description: "The request didn’t reach the server. Check your connection and try again.",
+        description:
+          "The request didn’t reach the server. Check your connection and try again.",
       });
       return;
     }

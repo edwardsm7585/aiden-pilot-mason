@@ -22,7 +22,12 @@ for (const file of files) {
   if (!imp) continue;
   const names = imp[1]
     .split(",")
-    .map((n) => n.trim().split(/\s+as\s+/).pop())
+    .map((n) =>
+      n
+        .trim()
+        .split(/\s+as\s+/)
+        .pop()
+    )
     .filter(Boolean);
   // Icons may also be rendered through an alias such as `<Icon` / `<item.icon`.
   const tags = [...names, "Icon"];

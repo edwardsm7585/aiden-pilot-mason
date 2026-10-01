@@ -8,12 +8,7 @@ import {
 } from "@/lib/security";
 import { abilities } from "@/lib/abilities";
 import { prisma } from "@/lib/prisma";
-import {
-  getMembership,
-  orgIdOf,
-  orgSession,
-  toOwnable,
-} from "@/lib/tenancy";
+import { getMembership, orgIdOf, orgSession, toOwnable } from "@/lib/tenancy";
 import { parseInput } from "@/lib/validation";
 import { isSerializationConflict } from "@/lib/db-errors";
 import { MemberId, RoleChangeBody } from "@/lib/schemas";

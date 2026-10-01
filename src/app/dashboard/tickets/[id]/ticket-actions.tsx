@@ -35,7 +35,11 @@ import {
 
 /** Mirrors the editable fields of UpdateTicketBody (src/lib/schemas.ts). */
 const EditSchema = z.object({
-  subject: z.string().trim().min(1, "Enter a subject").max(200, "Keep the subject under 200 characters"),
+  subject: z
+    .string()
+    .trim()
+    .min(1, "Enter a subject")
+    .max(200, "Keep the subject under 200 characters"),
   body: z.string().trim().min(1, "Enter the customer’s message").max(10_000),
   status: z.enum(["open", "pending"]),
 });
@@ -77,7 +81,8 @@ export function TicketActions({ ticket, canClose }: TicketActionsProps) {
       });
     } catch {
       toast.error(`Couldn’t ${action}`, {
-        description: "The request didn’t reach the server. Check your connection.",
+        description:
+          "The request didn’t reach the server. Check your connection.",
       });
     }
     return null;
@@ -113,7 +118,11 @@ export function TicketActions({ ticket, canClose }: TicketActionsProps) {
   async function setClosed(close: boolean) {
     setStatusBusy(true);
     const res = close
-      ? await send(`/api/tickets/${ticket.id}/close`, { method: "POST" }, "close the ticket")
+      ? await send(
+          `/api/tickets/${ticket.id}/close`,
+          { method: "POST" },
+          "close the ticket"
+        )
       : await send(
           `/api/tickets/${ticket.id}`,
           {

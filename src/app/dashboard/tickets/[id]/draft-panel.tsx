@@ -42,7 +42,8 @@ export function DraftPanel({ ticketId }: { ticketId: string }) {
       });
     } catch {
       toast.error("Couldn’t copy the draft", {
-        description: "Your browser blocked clipboard access. Select the text and copy it instead.",
+        description:
+          "Your browser blocked clipboard access. Select the text and copy it instead.",
       });
     }
   }
@@ -52,8 +53,8 @@ export function DraftPanel({ ticketId }: { ticketId: string }) {
       <CardHeader>
         <CardTitle>AI draft reply</CardTitle>
         <CardDescription>
-          A starting point you can copy into your reply. Nothing is sent to
-          the customer.
+          A starting point you can copy into your reply. Nothing is sent to the
+          customer.
         </CardDescription>
       </CardHeader>
 
@@ -107,17 +108,16 @@ export function DraftPanel({ ticketId }: { ticketId: string }) {
             </p>
           ) : (
             <p className="text-muted-foreground text-sm">
-              Pick a tone and draft a reply. It streams in here as it’s
-              written.
+              Pick a tone and draft a reply. It streams in here as it’s written.
             </p>
           )}
         </div>
 
         {error && (
           <p role="alert" className="text-destructive text-sm">
-            Couldn’t draft a reply: the AI service didn’t respond. Try
-            again, and if it keeps failing ask an owner to check the AI
-            provider settings.
+            Couldn’t draft a reply: the AI service didn’t respond. Try again,
+            and if it keeps failing ask an owner to check the AI provider
+            settings.
           </p>
         )}
       </CardContent>

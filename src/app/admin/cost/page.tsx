@@ -24,7 +24,10 @@ export default async function CostPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/admin/cost");
   const member = await getMembership(session.user.id);
-  const scoped = orgSession({ user: { id: session.user.id, roles: [] } }, member);
+  const scoped = orgSession(
+    { user: { id: session.user.id, roles: [] } },
+    member
+  );
   if (!abilities.can(scoped, "usage.read")) redirect("/dashboard/tickets");
 
   const { total, byUser, recent } = await getOrgUsage(member);
@@ -73,12 +76,15 @@ export default async function CostPage() {
         {total.calls === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted mb-4 rounded-sm p-3">
-              <Receipt className="text-muted-foreground size-6" strokeWidth={1.5} />
+              <Receipt
+                className="text-muted-foreground size-6"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="text-base font-semibold">No AI usage yet</h2>
             <p className="text-muted-foreground mt-1 max-w-xs text-sm">
-              Spend appears here after the first ticket is triaged or a reply
-              is drafted.
+              Spend appears here after the first ticket is triaged or a reply is
+              drafted.
             </p>
             <Button asChild variant="outline" size="sm" className="mt-4">
               <Link href="/dashboard/tickets">Go to tickets</Link>
@@ -92,19 +98,35 @@ export default async function CostPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted hover:bg-muted">
-                      <TableHead className="text-foreground font-semibold">Member</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Calls</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Tokens</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Spend</TableHead>
+                      <TableHead className="text-foreground font-semibold">
+                        Member
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Calls
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Tokens
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Spend
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {byUser.map((u) => (
                       <TableRow key={u.userId} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{u.email ?? "Former member"}</TableCell>
-                        <TableCell className="text-right tabular-nums">{formatNumber(u.calls)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{formatNumber(u.tokens)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{formatUsd(u.costUsd)}</TableCell>
+                        <TableCell className="font-medium">
+                          {u.email ?? "Former member"}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatNumber(u.calls)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatNumber(u.tokens)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatUsd(u.costUsd)}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -118,12 +140,24 @@ export default async function CostPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted hover:bg-muted">
-                      <TableHead className="text-foreground font-semibold">Time</TableHead>
-                      <TableHead className="text-foreground font-semibold">Member</TableHead>
-                      <TableHead className="text-foreground font-semibold">Model</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Tokens in / out</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Latency</TableHead>
-                      <TableHead className="text-foreground text-right font-semibold">Cost</TableHead>
+                      <TableHead className="text-foreground font-semibold">
+                        Time
+                      </TableHead>
+                      <TableHead className="text-foreground font-semibold">
+                        Member
+                      </TableHead>
+                      <TableHead className="text-foreground font-semibold">
+                        Model
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Tokens in / out
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Latency
+                      </TableHead>
+                      <TableHead className="text-foreground text-right font-semibold">
+                        Cost
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -132,15 +166,22 @@ export default async function CostPage() {
                         <TableCell className="text-muted-foreground whitespace-nowrap tabular-nums">
                           {formatDateTime(r.createdAt)}
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{r.email ?? "Former member"}</TableCell>
-                        <TableCell className="font-mono text-xs">{r.model}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {r.email ?? "Former member"}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {r.model}
+                        </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {formatNumber(r.promptTokens)} / {formatNumber(r.completionTokens)}
+                          {formatNumber(r.promptTokens)} /{" "}
+                          {formatNumber(r.completionTokens)}
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
                           {(r.latencyMs / 1000).toFixed(1)} s
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{formatUsd(r.costUsd)}</TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatUsd(r.costUsd)}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

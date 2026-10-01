@@ -63,6 +63,7 @@ export const POST = withAuth<RouteParams>(async (req, { session, params }) => {
   });
   return createAIStreamResponse(stream, {
     signal: req.signal,
-    onError: (err) => log.error({ err, ticketId: id }, "ai.draft stream failed"),
+    onError: (err) =>
+      log.error({ err, ticketId: id }, "ai.draft stream failed"),
   });
 });
