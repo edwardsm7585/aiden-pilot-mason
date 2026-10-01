@@ -1,0 +1,76 @@
+
+> mason-aiden-certificate@0.0.0 build
+> npm run prisma:merge && prisma generate && next build
+
+
+> mason-aiden-certificate@0.0.0 prisma:merge
+> aiden-db-merge-schema
+
+[aiden-db] wrote prisma/schema.prisma
+◇ injected env (3) from .env.local // tip: ◈ encrypted .env [www.dotenvx.com]
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.10.0) to .\src\generated\prisma in 70ms
+
+▲ Next.js 16.3.8 (Turbopack)
+- Environments: .env.local
+⚠ Warning: Next.js ignored package-lock.json in C:\Users\edwar because it is outside the current Git repository (C:\Users\edwar\mason-aiden-certificate).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 23ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 894ms
+  Running TypeScript ...
+  Finished TypeScript in 1508ms ...
+  Collecting page data using 23 workers ...
+  Generating static pages using 23 workers (0/20) ...
+  Generating static pages using 23 workers (5/20) 
+  Generating static pages using 23 workers (10/20) 
+  Generating static pages using 23 workers (15/20) 
+✓ Generating static pages using 23 workers (20/20) in 324ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /admin/audit
+├ ƒ /admin/cost
+├ ƒ /admin/members
+├ ƒ /admin/users
+├ ƒ /api/admin/audit
+├ ƒ /api/admin/members
+├ ƒ /api/admin/members/[id]
+├ ƒ /api/admin/usage
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[id]/roles
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/register
+├ ƒ /api/dev/impersonate
+├ ƒ /api/me
+├ ƒ /api/me/export
+├ ƒ /api/me/password
+├ ƒ /api/tickets
+├ ƒ /api/tickets/[id]
+├ ƒ /api/tickets/[id]/close
+├ ƒ /api/tickets/[id]/draft
+├ ƒ /dashboard
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/settings/appearance
+├ ƒ /dashboard/settings/data-privacy
+├ ƒ /dashboard/settings/profile
+├ ƒ /dashboard/settings/security
+├ ƒ /dashboard/tickets
+├ ƒ /dashboard/tickets/[id]
+├ ○ /icon.svg
+├ ƒ /login
+└ ƒ /register
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

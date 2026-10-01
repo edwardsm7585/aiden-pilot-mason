@@ -1,0 +1,30 @@
+# Phase 2 re-run 2026-10-01 12:08:28 — fresh database aiden_rerun
+## merge leaves composed schema unchanged
+warning: in the working copy of 'prisma/schema.prisma', LF will be replaced by CRLF the next time Git touches it
+schema diff lines: 0
+## migrate from empty + seed
+  └─ 20260930230755_init/
+    └─ migration.sql
+  └─ 20260930230800_add_deskline_core/
+    └─ migration.sql
+  └─ 20261001160529_ticket_owner_restrict/
+    └─ migration.sql
+All migrations have been successfully applied.
+✓ seeded roles + permissions
+✓ seeded DeskLine: 2 orgs, 7 users, 6 tickets
+## drift (migrations vs schema)
+migrate diff exit=0 (0 = no drift)
+## seed run 2 (idempotent)
+✓ seeded DeskLine: 2 orgs, 7 users, 6 tickets
+## counts
+orgs|2
+users|7
+memberships|7
+tickets|6
+## FK delete rules
+ai_usage.org_id -> orgs CASCADE
+ai_usage.user_id -> users CASCADE
+memberships.org_id -> orgs CASCADE
+memberships.user_id -> users CASCADE
+tickets.org_id -> orgs CASCADE
+tickets.owner_id -> users RESTRICT

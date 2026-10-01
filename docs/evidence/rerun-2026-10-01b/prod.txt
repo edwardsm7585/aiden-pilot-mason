@@ -1,0 +1,19 @@
+# Production server re-run 2026-10-01 12:13:44 — next start, aiden_rerun fresh, AI_SPEND_ALERT_USD_PER_HOUR=0.003 for the alert test
+
+## smoke + matrix + AI usage (phase4 harness against prod)
+== 7 passed, 0 failed
+ai_usage rows added: 2 (expected 2)
+audit metadata containing ticket text: 0
+== matrix: 37 passed, 0 failed
+
+## security headers (GET /login)
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-<per request>' 'strict-dynamic'; connect-src 'self'; object-src 'none'
+permissions-policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+
+## error bodies generic
+malformed JSON: {"error":{"formErrors":["Request body is not valid JSON"],"fieldErrors":{}}} HTTP 400

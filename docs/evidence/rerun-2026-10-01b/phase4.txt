@@ -1,0 +1,74 @@
+# Phase 4 re-run 2026-10-01 12:08:58 — dev server, aiden_rerun (fresh from zero)
+
+## Sign-in (password from SEED_PASSWORD)
+login ok   owner@acme.test
+login ok   agent1@acme.test
+login ok   agent2@acme.test
+login ok   viewer@acme.test
+login ok   agent@globex.test
+
+## Graded smoke suite (scripts/smoke.sh)
+PASS 1 unauthenticated GET /api/tickets (401)
+PASS 2 malformed create body (400)
+PASS 3 cross-tenant GET (404)
+PASS 4 IDOR PATCH other agent same-org (404)
+PASS 5 missing id (404)
+PASS 6 viewer POST draft (403)
+PASS 7 404 bodies identical (no enumeration leak)
+== 7 passed, 0 failed
+
+## Extended matrix
+| Check | Expected | Got | |
+|---|---|---|---|
+| param validation GET /api/tickets/not-a-cuid | 400 | 400 | ok |
+| query validation ?status=bogus | 400 | 400 | ok |
+| viewer POST /api/tickets | 403 | 403 | ok |
+| viewer PATCH org ticket | 403 | 403 | ok |
+| viewer close org ticket | 403 | 403 | ok |
+| viewer GET another member's ticket (D1) | 200 | 200 | ok |
+| owner GET another member's ticket (D1) | 200 | 200 | ok |
+| agent2 GET agent1's ticket | 404 | 404 | ok |
+| Globex agent GET Acme ticket | 404 | 404 | ok |
+| list size agent1 | 3 | 3 | ok |
+| list size agent2 | 1 | 1 | ok |
+| list size viewer | 4 | 4 | ok |
+| list size owner | 4 | 4 | ok |
+| list size gagent | 2 | 2 | ok |
+| agent1 PATCH {status:pending} own | 200 | 200 | ok |
+| agent1 PATCH {} (empty) | 400 | 400 | ok |
+| agent1 PATCH {status:closed} (must use close) | 400 | 400 | ok |
+| draft {tone:angry} | 400 | 400 | ok |
+| agent2 draft on agent1's ticket | 404 | 404 | ok |
+| agent1 GET admin/members | 403 | 403 | ok |
+| viewer GET admin/audit | 403 | 403 | ok |
+| agent1 GET admin/usage | 403 | 403 | ok |
+| owner members count | 4 | 4 | ok |
+| owner viewer->agent | 200 | 200 | ok |
+| ex-viewer creates with SAME session (D2 freshness) | 201 | 201 | ok |
+| owner agent->viewer (revert) | 200 | 200 | ok |
+| reverted viewer POST again | 403 | 403 | ok |
+| owner demotes last owner (self) | 409 | 409 | ok |
+| owner PATCH a Globex membership | 404 | 404 | ok |
+| owner PATCH {role:admin} | 400 | 400 | ok |
+| owner audit: all actors @acme.test (D3) | true | true | ok |
+login ok   noorg-1790878148@example.test
+| no-org list (D4) | 200 0 | 200 0 | ok |
+| no-org GET [id] (D4) | 404 | 404 | ok |
+| no-org create (D4) | 403 | 403 | ok |
+| no-org admin/members (D4) | 403 | 403 | ok |
+| agent1 close own | 200 | 200 | ok |
+| agent1 reopen own (PATCH status:open) | 200 | 200 | ok |
+
+## AI + usage sink
+create: HTTP 201; triage: urgent / technical / negative
+triage AIUsage row:
+agent1@acme.test | claude-sonnet-4-6 | in 256 out 21 | $0.001083 | req 6eb86596-5a08-4f9e-985b-a777cf385b8f
+same request_id in audit_logs: ticket.create, ai.classify
+draft SSE: 60 data frames, 1 done, 0 errors
+streamed-draft AIUsage row (reported at end of stream):
+agent1@acme.test | out 173 | $0.003201 | req 9b1ccce8-aa13-4f8a-ba4a-b4b559513716
+same request_id in audit_logs: ai.draft
+ai_usage rows added: 2 (expected 2)
+audit metadata containing ticket text: 0
+
+== matrix: 37 passed, 0 failed

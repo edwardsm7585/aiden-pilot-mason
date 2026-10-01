@@ -1,0 +1,37 @@
+# Phase 0 re-check 2026-10-01 12:08:03 — head 3661676
+
+## Tools
+osv-scanner: osv-scanner version: 2.4.0
+node v24.15.0, npm 11.12.1, psql 16.15
+
+## Repo
+remote: https://github.com/edwardsm7585/aiden-pilot-mason.git
+visibility: PUBLIC
+branch: main; in sync with origin: yes
+working tree: clean apart from this evidence file (docs/evidence/rerun-2026-10-01b/phase0.txt, being written)
+.npmrc in repo: none
+.env.local tracked: no
+
+## Installed tree matches package-lock.json
+npm ls: ok (no missing/invalid/extraneous)
+
+## aiden doctor
+aiden doctor
+
+1. aiden.config
+   ✓ C:\Users\edwar\mason-aiden-certificate\aiden.config.ts valid (v2.0.1)
+
+2. Environment variables
+   ✓ all 3 required vars present
+
+3. CVE scan (osv-scanner)
+   ✓ no vulnerabilities found
+
+4. npm audit (high/critical only)
+   ✓ clean
+
+5. SDK wiring
+   ✓ <ThemeProvider> mounted in root layout
+
+All checks passed.
+doctor exit=0

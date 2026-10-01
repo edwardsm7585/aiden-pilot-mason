@@ -1,0 +1,25 @@
+# F5 nonce CSP 2026-10-01 12:15:21 — production
+/login: HTTP 200, <script> tags 19, with this request's nonce 19
+/register: HTTP 200, <script> tags 19, with this request's nonce 19
+/dashboard/tickets: HTTP 307, <script> tags 9, with this request's nonce 9
+/does-not-exist: HTTP 404, <script> tags 18, with this request's nonce 18
+nonce differs per request: yes
+
+## clean page loads
+/login []
+/dashboard []
+## browser flow
+signed in via form -> /dashboard
+draft streamed: chars = 764
+dark class applied before hydration script ran: true
+CSP violations during normal use (steps 1-3): none
+page errors: none
+## XSS vectors
+## nonce CSP
+script-src 'self' 'nonce-YjEyNGNmZGUtNWQ0MC00YmU3LThlMDEtZWJmOTkwMjc4N2Iw' 'strict-dynamic'
+| Vector | Ran? | CSP report |
+|---|---|---|
+| injected HTML event handler (<img onerror>) | blocked | script-src-attr |
+| parser-inserted inline <script> | blocked | - |
+| javascript: URL | blocked | script-src-elem |
+| script created by already-running JS | **ran** | - |

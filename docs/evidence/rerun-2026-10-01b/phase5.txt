@@ -1,0 +1,58 @@
+# Phase 5 re-run 2026-10-01 12:09:27 — dev server
+## screens (ui.mjs)
+01-login.png -> /login
+02-agent-tickets.png -> /dashboard/tickets
+03-owner-tickets-all-org.png -> /dashboard/tickets
+04-viewer-tickets-read-only.png -> /dashboard/tickets
+05-agent-filter-empty-state.png -> /dashboard/tickets?status=pending
+06-agent-ticket-detail.png -> /dashboard/tickets/cdeskline0ticket0a1
+07-draft-streaming.png
+08-draft-done.png
+09-viewer-ticket-read-only.png -> /dashboard/tickets/cdeskline0ticket0a1
+10-agent-other-agents-ticket-404.png -> /dashboard/tickets/cdeskline0ticket0a3
+11-owner-members.png -> /admin/members
+12-owner-audit-log.png -> /admin/audit
+13-owner-ai-cost.png -> /admin/cost
+14-agent-admin-redirected.png -> /dashboard/tickets
+15-dark-owner-tickets.png -> /dashboard/tickets
+16-dark-ticket-detail.png -> /dashboard/tickets/cdeskline0ticket0a1
+17-dark-ai-cost.png -> /admin/cost
+18-mobile-tickets.png -> /dashboard/tickets
+19-mobile-ticket-detail.png -> /dashboard/tickets/cdeskline0ticket0a1
+20-tablet-tickets.png -> /dashboard/tickets
+ERRORS: none
+## interactions (interact.mjs)
+create toast: Ticket createdAI triaged it as high priority.
+validation messages: [ 'Enter a subject', 'Enter the customer’s message' ]
+promote toast: Role updatedAcme Viewer is now an agent.
+revert toast: Role updatedAcme Viewer is now a viewer.
+last-owner toast: Couldn’t change the roleThe organisation must keep at least one owner. Make someone else an owner first.
+owner select after refusal shows: Owner
+ERRORS: owner console: Failed to load resource: the server responded with a status of 409 (Conflict)
+## mobile (mobile.mjs)
+18-mobile-tickets.png -> /dashboard/tickets
+18b-mobile-owner-tickets.png -> /dashboard/tickets
+ERRORS: none
+## design-system runtime (ds-check.mjs)
+| Check | Expected | Got | |
+|---|---|---|---|
+| status filters are aiden-ui Buttons (data-slot=button) | 4/4 | 4/4 | ok |
+| active filter marked aria-current=page | All | All | ok |
+| Pending filter navigates + becomes current | ?status=pending Pending | ?status=pending Pending | ok |
+| detail page tabs (agent) | Reply:true,Edit ticket:false | Reply:true,Edit ticket:false | ok |
+| tone picker = aiden-ui Buttons as radios | Friendly:true:button,Formal:false:button,Concise:false:button | Friendly:true:button,Formal:false:button,Concise:false:button | ok |
+| selecting Formal updates aria-checked | true | true | ok |
+| Edit tab shows the edit form | true | true | ok |
+| draft still there after Edit → Reply (forceMount) | 953 | 953 | ok |
+| Details card visible on Reply tab | true | true | ok |
+| viewer: no tabs on detail page | 0 | 0 | ok |
+| ThemeSelector Dark flips <html> class | dark | dark | ok |
+| ThemeSelector Light flips it back | light | light | ok |
+| no horizontal page scroll at 390px (10 pages) | none | none | ok |
+| no horizontal page scroll at 820px (10 pages) | none | none | ok |
+| no horizontal page scroll at 1440px (10 pages) | none | none | ok |
+| signed-out pages: no horizontal scroll at 390px | none | none | ok |
+| signed-out pages: no horizontal scroll at 1440px | none | none | ok |
+
+== 17 passed, 0 failed
+page/console errors: none

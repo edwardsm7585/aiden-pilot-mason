@@ -1,0 +1,27 @@
+# Security-guide gap fixes 2026-10-01 12:16:35 — production, aiden_rerun fresh, AI_SPEND_ALERT_USD_PER_HOUR=0.003
+
+# Note: first run on this server (after the Phase 4 harness) counted 2 alerts in the actor check: agent1 had legitimately crossed the 0.003 threshold earlier (triage + draft = $0.0044) and got its own alert, as designed. The check assumed agent2 was the only user to cross it, so it was narrowed to agent2 and re-run on a fresh database:
+
+| Check | Expected | Got | |
+|---|---|---|---|
+| auth.signin row written | 1 | 1 | ok |
+| auth.signin row has a request_id | 1 | 1 | ok |
+| auth.signout row written, with request_id | 1|1 | 1|1 | ok |
+| register new user | 201 | 201 | ok |
+| auth.register row for that user, with request_id | 1|1 | 1|1 | ok |
+| re-register same email: same 201, no second audit row | 201 1 | 201 1 | ok |
+| admin users: default query | 200 | 200 | ok |
+| admin users: q + limit=25 (what the UI sends) | 200 | 200 | ok |
+| admin users: limit=500 (was silently clamped) | 400 | 400 | ok |
+| admin users: limit=abc | 400 | 400 | ok |
+| admin users: cursor not an id | 400 | 400 | ok |
+| admin users: q over 200 chars | 400 | 400 | ok |
+| admin users: real nextCursor paginates | 200 | 200 | ok |
+| non-admin (Acme owner) still 403 | 403 | 403 | ok |
+| after 1 triage call (~$0.001): no alert yet | 0 | 0 | ok |
+| after a draft pushes the hour over $0.003: one alert | 1 | 1 | ok |
+|  ↳ alert metadata | | `{"spentUsd": 0.004779, "thresholdUsd": 0.003, "windowMinutes": 60}` | |
+| alert actor is agent2, request_id set | agent2@acme.test|1 | agent2@acme.test|1 | ok |
+| further spend in the same hour: no repeat alert | 1 | 1 | ok |
+
+== 18 passed, 0 failed

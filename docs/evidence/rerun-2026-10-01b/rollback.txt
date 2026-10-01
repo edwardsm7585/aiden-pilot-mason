@@ -1,0 +1,13 @@
+# Rollback rehearsal re-run 2026-10-01 12:24:12
+
+Throwaway worktree (branch rollback-rehearsal-3, never pushed, removed afterwards), code restored to cb67bd6 (src, prisma/fragments, aiden.config.ts); database aiden_rollback = createdb -T aiden_rerun after a real workload (Phase 4 harness on production), dropped afterwards. Drop migration generated with prisma migrate diff --output and applied with migrate deploy; it covers all three DeskLine migrations, including ticket_owner_restrict. App booted with next dev --webpack.
+
+| Check | Before | After |
+|---|---|---|
+| public tables | 13 | 9 |
+| DeskLine tables (orgs, memberships, tickets, ai_usage) | 4 | 0 |
+| audit_logs rows | 37 | 37 |
+| of which DeskLine events | 10 | 10 |
+| users | 8 | 8 |
+| sign-in owner@acme.test | | 302, /api/me 200 |
+| /login /dashboard /dashboard/tickets /api/tickets /admin/members | | 200 200 404 404 404 |

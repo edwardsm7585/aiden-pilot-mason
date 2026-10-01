@@ -1,0 +1,8 @@
+# Dependency scans 2026-10-01 12:21:46
+found 0 vulnerabilities
+npm audit exit=0
+Scanned C:\Users\edwar\mason-aiden-certificate\package-lock.json file and found 990 packages
+No issues found
+osv exit=0
+aiden-logging installed copies: 1
+CI (latest run): success @ 3661676

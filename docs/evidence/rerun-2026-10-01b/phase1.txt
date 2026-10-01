@@ -1,0 +1,20 @@
+# Phase 1 re-check 2026-10-01 12:08:28
+ok   D1
+ok   D2
+ok   D3
+ok   D4
+ok   D5
+ok   D6
+ok   D7
+ok   section 1
+ok   section 2
+ok   section 3
+ok   section 4
+ok   section 5
+ok   section 6
+ok   section 7
+deviation rows: 30
+plan merge: 1 (8e79e38)
+implementation commits before the plan merge (expect only scaffold + config fix):
+  e3937a5 fix(config): make aiden.config.ts parseable by aiden-cli 2.0.1
+  cb9cd15 chore: aiden init scaffold (unmodified)

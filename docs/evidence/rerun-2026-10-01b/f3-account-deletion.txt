@@ -1,0 +1,36 @@
+# F3 account deletion 2026-10-01 12:17:15 — production, aiden_rerun fresh
+
+## Account deletion keeps org data (F3)
+| Check | Expected | Got | |
+|---|---|---|---|
+| FK tickets.owner_id is RESTRICT | r | r | ok |
+| agent2 DELETE /api/me | 204 | 204 | ok |
+| ticket a3 still exists | 1 | 1 | ok |
+| a3 now owned by owner@acme.test | cmupuwek5000510fb9atgdlj0 | cmupuwek5000510fb9atgdlj0 | ok |
+| org ticket count unchanged | 4 | 4 | ok |
+| audit: ticket.reassign {count:1} | 1|account.delete | 1|account.delete | ok |
+| audit: user.delete written after success | 1 | 1 | ok |
+| sole owner DELETE /api/me | 409 | 409 | ok |
+|  ↳ body | | `{"error":"You're the only owner of your organisation. Make another member an owner, then delete your account."}` | |
+| owner still exists; owners=1 | 1 1 | 1 1 | ok |
+| no user.delete audit for the refusal | 1 | 1 | ok |
+| viewer DELETE /api/me (no tickets) | 204 | 204 | ok |
+| raw SQL delete of a ticket owner is refused by the FK | yes | yes | ok |
+| agent1 promoted to owner; owners=2 | 2 | 2 | ok |
+| concurrent owner deletions: exactly one 204 | 1 | 1 | ok |
+|  ↳ codes | | 204, 409 | |
+| org still has an owner | 1 | 1 | ok |
+| no Acme ticket lost | 4 | 4 | ok |
+| every Acme ticket owned by a current owner | 0 | 0 | ok |
+
+== 17 passed, 0 failed
+
+## Serializable guard, forced overlap, 6 rounds (fresh seed; owners after must be 1; every conflict recognised)
+| Round | tx A | tx B | owners after |
+|---|---|---|---|
+| 1 | demoted (200) | conflict → 409 (PrismaClientKnownRequestError) | 1 |
+| 2 | demoted (200) | conflict → 409 (DriverAdapterError) | 1 |
+| 3 | demoted (200) | conflict → 409 (DriverAdapterError) | 1 |
+| 4 | demoted (200) | conflict → 409 (DriverAdapterError) | 1 |
+| 5 | conflict → 409 (DriverAdapterError) | demoted (200) | 1 |
+| 6 | demoted (200) | conflict → 409 (DriverAdapterError) | 1 |

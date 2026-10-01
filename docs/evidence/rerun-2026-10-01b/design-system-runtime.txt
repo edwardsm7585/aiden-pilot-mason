@@ -1,0 +1,23 @@
+# Design-system runtime 2026-10-01 12:20:40 — production, aiden_rerun fresh
+| Check | Expected | Got | |
+|---|---|---|---|
+| status filters are aiden-ui Buttons (data-slot=button) | 4/4 | 4/4 | ok |
+| active filter marked aria-current=page | All | All | ok |
+| Pending filter navigates + becomes current | ?status=pending Pending | ?status=pending Pending | ok |
+| detail page tabs (agent) | Reply:true,Edit ticket:false | Reply:true,Edit ticket:false | ok |
+| tone picker = aiden-ui Buttons as radios | Friendly:true:button,Formal:false:button,Concise:false:button | Friendly:true:button,Formal:false:button,Concise:false:button | ok |
+| selecting Formal updates aria-checked | true | true | ok |
+| Edit tab shows the edit form | true | true | ok |
+| draft still there after Edit → Reply (forceMount) | 1170 | 1170 | ok |
+| Details card visible on Reply tab | true | true | ok |
+| viewer: no tabs on detail page | 0 | 0 | ok |
+| ThemeSelector Dark flips <html> class | dark | dark | ok |
+| ThemeSelector Light flips it back | light | light | ok |
+| no horizontal page scroll at 390px (10 pages) | none | none | ok |
+| no horizontal page scroll at 820px (10 pages) | none | none | ok |
+| no horizontal page scroll at 1440px (10 pages) | none | none | ok |
+| signed-out pages: no horizontal scroll at 390px | none | none | ok |
+| signed-out pages: no horizontal scroll at 1440px | none | none | ok |
+
+== 17 passed, 0 failed
+page/console errors: none
