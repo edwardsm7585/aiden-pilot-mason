@@ -30,5 +30,6 @@ Captured with headless Chrome using real credential sign-ins (`authjs.session-to
 | `27-csp-nonce-draft-works.png` | agent1 | Streamed AI draft on the production build under the nonce CSP, with 0 CSP violations (F5) |
 | `28-login-wrong-password-toast.png` | (signed out) | Wrong password: the toast now appears (no Toaster on auth pages before) |
 | `29-login-rate-limited.png` | (signed out) | Sign-in after the per-account limit: 429, form stays usable; SDK form's generic text (F4) |
+| `30-owner-audit-spend-alert.png` | owner | `ai.spend_alert` (amber) sharing a request id with the draft that crossed the threshold; sign-in/sign-out rows now carry request ids |
 
 DB state and request traces after these runs: `../db-phase5/`.

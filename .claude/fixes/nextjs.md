@@ -30,3 +30,7 @@
   - **Symptom 2**: a `script-src` `securitypolicyviolation` (blockedURI `eval`) on every page load, from Zod 4's `allowsEval` probe in a client chunk. Harmless (try/catch, falls back) but noisy.
   - **Fix 2**: `src/instrumentation-client.ts` → `z.config({ jitless: true })`.
   - **Test note**: `'strict-dynamic'` trusts scripts created by already-running JS; test CSP with injected-HTML vectors (`<img onerror>`, parser-inserted `<script>`, `javascript:` URLs), not `createElement` from page code.
+
+- **[2026-10-01]** `⨯ Error: The destination stream closed early` in the prod server log
+  - **Cause**: the client cancelled a page/RSC stream mid-response (e.g. a test navigating away during the login form's post-sign-in `router.refresh()`). Reproduced: aborted RSC fetches log it; complete ones never do.
+  - **Action**: none; it's a client disconnect, not a server fault. Don't chase it unless it appears without aborted navigations.

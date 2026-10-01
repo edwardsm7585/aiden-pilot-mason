@@ -1,0 +1,50 @@
+# CVE scanning in CI (AIDEN security guide §8: osv-scanner "locally via aiden
+# doctor; in CI; before every release", npm audit high/critical).
+#
+# Both scanners read package-lock.json only, so no `npm install` is needed:
+# the @upstart13-com/* packages come from a private feed that CI has no
+# credentials for. Runs on every push/PR to main and weekly, so new advisories
+# against unchanged dependencies are caught too.
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cve-scan:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions pinned to commit SHAs (v4.2.2, v4.4.0).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Install osv-scanner 2.4.0 (checksum-verified)
+        env:
+          OSV_VERSION: v2.4.0
+        run: |
+          base="https://github.com/google/osv-scanner/releases/download/${OSV_VERSION}"
+          curl -sSfL -o osv-scanner_linux_amd64 "${base}/osv-scanner_linux_amd64"
+          curl -sSfL -o osv-scanner_SHA256SUMS "${base}/osv-scanner_SHA256SUMS"
+          grep " osv-scanner_linux_amd64$" osv-scanner_SHA256SUMS | sha256sum --check --strict
+          install -m 0755 osv-scanner_linux_amd64 /usr/local/bin/osv-scanner
+          osv-scanner --version
+
+      - name: osv-scanner (package-lock.json)
+        run: osv-scanner --lockfile package-lock.json
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+
+      - name: npm audit (high/critical, lockfile only)
+        run: npm audit --package-lock-only --audit-level=high

@@ -26,6 +26,7 @@ export const dynamic = "force-dynamic";
 function eventVariant(event: string) {
   if (event === "security.ownership_failed") return "error" as const;
   if (event.startsWith("security.")) return "warning" as const;
+  if (event === "ai.spend_alert") return "warning" as const;
   if (event.startsWith("auth.")) return "success" as const;
   if (event.startsWith("ai.")) return "primary" as const;
   return "secondary" as const;

@@ -22,7 +22,8 @@ chk(){ out=$(eval "$2" 2>/dev/null); if [ -n "$out" ]; then echo "FAIL: $1"; ech
 PUBLIC_ROUTES='src/app/api/auth/\[\.\.\.nextauth\]/route.ts|src/app/api/auth/register/route.ts'
 chk "route without withAuth (E1 excluded)" 'grep -rLE "withAuth" src/app/api --include=route.ts | grep -vE "^($PUBLIC_ROUTES)$"'
 NA="src/app/api/auth/[...nextauth]/route.ts"
-chk "E1: nextauth GET is the plain Auth.js handler" 'grep -q "^export const { GET } = handlers;" "$NA" || echo "GET changed"'
+chk "E1: nextauth GET only adds request context to Auth.js" 'grep -q "^export const GET = withPublicRequestContext(" "$NA" || echo "GET is not wrapped in withPublicRequestContext"; grep -q "handlers.GET(" "$NA" || echo "GET no longer delegates to Auth.js"'
+chk "E1: public auth routes open a request context" 'for f in "$NA" src/app/api/auth/register/route.ts; do grep -q "withPublicRequestContext(" "$f" || echo "$f: no request context (audit rows lose requestId)"; done'
 chk "E1: nextauth POST rate-limits credentials sign-in (F4)" 'grep -q "withRateLimit(" "$NA" || echo "lost withRateLimit"; grep -q "/callback/credentials" "$NA" || echo "lost the credentials-callback match"; grep -q "handlers.POST(" "$NA" || echo "POST no longer delegates to Auth.js"'
 chk "E1: register route is rate-limited" 'grep -q "withRateLimit(" src/app/api/auth/register/route.ts || echo "register route lost withRateLimit"'
 chk "raw req.json()"                      'grep -rn "req\.json()" src'

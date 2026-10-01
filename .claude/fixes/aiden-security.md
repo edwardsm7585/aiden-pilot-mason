@@ -13,3 +13,7 @@
 
 - **[2026-10-01]** Per-IP limits trust `X-Forwarded-For`
   - **Note**: `src/lib/client-ip.ts` (shared by register and sign-in) keys on the first `X-Forwarded-For` hop. Behind a proxy that overwrites XFF this is the client IP; exposed directly, a client can rotate the header to dodge the per-IP limit (the per-account sign-in limit still applies), and requests with no XFF share one `unknown` bucket. Deploy behind a proxy that sets XFF, or switch the key to a trusted platform header.
+
+- **[2026-10-01]** Public routes have no request context, so their audit rows lack `requestId`
+  - **Symptom**: `auth.signin` rows (emitted inside NextAuth's handler) had `request_id` NULL; only `withAuth` routes open `withRequestContext`.
+  - **Fix**: `src/lib/request-context.ts` `withPublicRequestContext()` (same `x-request-id`-or-UUID rule) wraps NextAuth GET/POST and register.

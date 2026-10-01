@@ -18,3 +18,4 @@
 [2026-10-01 08:58] completed security(review): independent re-check of security-review.md at d7cd7af — FAIL: F3 HIGH open (account deletion cascade), F4/F5 MEDIUM; citations corrected
 [2026-10-01 10:11] completed fix(security): F3 — account deletion reassigns tickets to an org owner, refuses last owner; Ticket.owner Restrict migration; serializable last-owner checks — 17/17 + 6/6 races, smoke 7/7, matrix 37/37
 [2026-10-01 10:36] completed fix(security): F4 credentials sign-in rate limit (per IP + per account) and F5 nonce CSP; root Toaster; zod jitless — F4 12/12, F5 0 violations + XSS vectors blocked, smoke 7/7, matrix 37/37 on prod build
+[2026-10-01 10:57] completed security(guide): checked all AIDEN security-guide sections; fixed CI CVE scan, AI spend alert, register audit, public-route request context, admin/users query validation, server-only on prisma/auth, retention doc — 18/18 + smoke 7/7, matrix 37/37, F4 12/12, CSP 0 violations

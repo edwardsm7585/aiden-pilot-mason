@@ -2,8 +2,13 @@ import type { NextRequest } from "next/server";
 import { withRateLimit } from "@upstart13-com/aiden-security";
 import { handlers } from "@/lib/auth";
 import { clientIp } from "@/lib/client-ip";
+import { withPublicRequestContext } from "@/lib/request-context";
 
-export const { GET } = handlers;
+// Both methods run in a request context, so Auth.js audit events
+// (auth.signin, auth.signout) carry a requestId like every other route.
+export const GET = withPublicRequestContext((req: Request) =>
+  handlers.GET(req as NextRequest)
+);
 
 /**
  * Credentials sign-in is rate-limited (security finding F4); every other
@@ -62,7 +67,9 @@ const limited = withRateLimit(
   }
 );
 
-export async function POST(req: NextRequest): Promise<Response> {
+export const POST = withPublicRequestContext(rateLimitedPost);
+
+async function rateLimitedPost(req: Request): Promise<Response> {
   const res = await limited(req, undefined);
   if (res.status !== 429) return res;
   // next-auth's `signIn()` reads `data.url` and its `error` param, so a bare

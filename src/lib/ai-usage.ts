@@ -3,6 +3,7 @@ import { setAIUsageSink } from "@upstart13-com/aiden-logging";
 import { prisma } from "@/lib/prisma";
 import { log } from "@/lib/logger";
 import { getMembership } from "@/lib/tenancy";
+import { auditLog } from "@/lib/security";
 
 /**
  * Persist every AI call's usage to `AIUsage` (plan §2). aiden-ai reports
@@ -36,7 +37,38 @@ setAIUsageSink(async (record) => {
         latencyMs: Math.round(record.latencyMs),
       },
     });
+    await alertOnSpendSpike(record.userId, record.costUSD);
   } catch (err) {
     log.error({ err, requestId: record.requestId }, "ai.usage write failed");
   }
 });
+
+/**
+ * Cost-runaway guard: alert when one user's AI spend in the last hour
+ * crosses `AI_SPEND_ALERT_USD_PER_HOUR` (default $1). Fires once per
+ * crossing, as a `log.warn` for ops and an `ai.spend_alert` audit row that
+ * org owners see in the Audit log. Detection only: nothing is blocked, and
+ * the per-call `maxTokens` caps still bound each request.
+ */
+const SPEND_WINDOW_MS = 60 * 60_000;
+
+async function alertOnSpendSpike(userId: string, latestUsd: number) {
+  const threshold = Number(process.env.AI_SPEND_ALERT_USD_PER_HOUR ?? "1");
+  if (!(threshold > 0)) return;
+  const { _sum } = await prisma.aIUsage.aggregate({
+    where: {
+      userId,
+      createdAt: { gte: new Date(Date.now() - SPEND_WINDOW_MS) },
+    },
+    _sum: { costUsd: true },
+  });
+  const spent = Number(_sum.costUsd ?? 0);
+  if (spent < threshold || spent - latestUsd >= threshold) return;
+  const metadata = {
+    windowMinutes: SPEND_WINDOW_MS / 60_000,
+    spentUsd: Number(spent.toFixed(6)),
+    thresholdUsd: threshold,
+  };
+  log.warn({ userId, ...metadata }, "ai.spend_alert");
+  auditLog({ event: "ai.spend_alert", actorId: userId, metadata });
+}

@@ -1,20 +1,26 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { withAuth, assertCan } from "@/lib/security";
 import { abilities } from "@/lib/abilities";
 import { prisma } from "@/lib/prisma";
+import { parseInput } from "@/lib/validation";
 
 const MAX_LIMIT = 100;
+
+// Query strings are validated like bodies (plan D5): bad input is a 400,
+// not a silently clamped or passed-through value.
+const UsersQuery = z.object({
+  q: z.string().trim().max(200).default(""),
+  cursor: z.string().cuid().optional(),
+  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(25),
+});
 
 export const GET = withAuth(async (req, { session }) => {
   assertCan(abilities, session, "users.manage");
 
-  const url = new URL(req.url);
-  const q = url.searchParams.get("q")?.trim() ?? "";
-  const cursor = url.searchParams.get("cursor") ?? undefined;
-  const limit = clamp(
-    parseInt(url.searchParams.get("limit") ?? "25", 10),
-    1,
-    MAX_LIMIT
+  const { q, cursor, limit } = parseInput(
+    UsersQuery,
+    Object.fromEntries(new URL(req.url).searchParams)
   );
 
   const where = q
@@ -47,8 +53,3 @@ export const GET = withAuth(async (req, { session }) => {
 
   return NextResponse.json({ users: rows, nextCursor });
 });
-
-function clamp(n: number, lo: number, hi: number): number {
-  if (Number.isNaN(n)) return lo;
-  return Math.min(Math.max(n, lo), hi);
-}
