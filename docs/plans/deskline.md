@@ -331,6 +331,7 @@ Must be dated **before** the first UI commit.
 | 22 | 2026-10-01 | Production server rejected sign-in: Auth.js v5 `UntrustedHost` | Not covered | `.env.example` documents `AUTH_URL` / `AUTH_TRUST_HOST`; prod smoke run with `AUTH_TRUST_HOST=true` (not committed) → 7/7 | n/a |
 | 23 | 2026-10-01 | `/security-review` FAIL: F1 ticket `GET` returned the full row; F2 seed hard-coded the demo password | §4 / seed | `58b360b`: allow-list `select` on the ticket `GET`; `SEED_PASSWORD` from env + no demo accounts in production. Re-run: PASS | Yes: `security-review.md` |
 | 24 | 2026-10-01 | Rollback rehearsal: `prisma migrate dev` refuses non-interactive data-loss migrations | §7 step 2: `db:migrate -- --name drop_deskline_core` | Generate with `prisma migrate diff --from-config-datasource --to-schema … --script`, apply with `prisma migrate deploy` (the CI-safe path) | Yes: §7 via `rollback-rehearsal.md` |
+| 25 | 2026-10-01 | Residual of security finding F2: the old seed password was still quoted in `security-review.md` (public repo) and `.env.local` reused it, so demo accounts accepted a published password | F2 fix (`58b360b`) assumed to close the exposure | Rotated `SEED_PASSWORD` (random, never committed), re-seeded `aiden_dev`/`aiden_rerun`, redacted the report; `verify.sh` now fails if the live value appears in any tracked file. Old value stays in earlier commits but no longer works (0/7 accounts) | Yes: `security-review.md` F2a |
 
 ## Verify-against-plan record
 

@@ -55,6 +55,7 @@ chk "E2: settings layout renders PageHeader" 'grep -q "PageHeader" src/app/dashb
 # ── Repo hygiene ─────────────────────────────────────────────────────────────
 chk ".env committed"                      'git log --all --name-only --format= | grep -E "(^|/)\.env" | grep -v "\.example$" | sort -u'
 chk "API key pattern in tracked files"    'git grep -nIE "sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{40,}|ghp_[A-Za-z0-9]{30,}" -- . ":!*.md"'
+chk "live SEED_PASSWORD in tracked files"  'v=$(sed -n "s/^SEED_PASSWORD=\"\{0,1\}\([^\"]*\)\"\{0,1\}\r\{0,1\}$/\1/p" .env.local 2>/dev/null); [ -z "$v" ] || git grep -nIF -e "$v" -- . | cut -d: -f1,2'
 chk "next-env.d.ts tracked or not ignored" '{ git ls-files --error-unmatch next-env.d.ts >/dev/null 2>&1 && echo "next-env.d.ts is tracked"; git check-ignore -q --no-index next-env.d.ts || echo "next-env.d.ts is not gitignored"; } 2>/dev/null'
 chk "schema.prisma hand-edited"          'git log --format=%s -- prisma/schema.prisma | grep -viE "merge|generate|init|scaffold"'
 echo "== $fails failing checks"; [ "$fails" -eq 0 ]

@@ -9,16 +9,16 @@
 
 ---
 
-### Code Analysis
+### Code Analysis (initial run, head `b8af692`; current status in the last column)
 
-| Category | Status | Findings |
-|----------|--------|----------|
-| Auth & Access Control | PASS | All 8 new/changed DeskLine route files use `withAuth`, validate with `parseRequest`/`parseInput`, and scope every query by org (plus owner for agents) before `assertOwnership` → `assertCan`. Acknowledged public exceptions: `api/auth/[...nextauth]` (Auth.js handler) and `api/auth/register` (rate-limited); both asserted by `verify.sh` E1. NextAuth callbacks unchanged (only an import added to `src/lib/auth.ts`). |
-| Injection Prevention | PASS | No `$executeRawUnsafe`/`$queryRawUnsafe`, `eval`, `new Function`, or `dangerouslySetInnerHTML` in app code (`src/generated` is the Prisma client). No raw `req.json()`: every body goes through Zod. Prompt injection: see `injection-probe.md` (0/18). |
-| Data Exposure | **FAIL** | 1 HIGH (by this skill's rule): see F1. All other responses use explicit `select` or hand-built objects; no stack traces in responses (`withAuth` maps known errors; prod 500s are generic); no `console.*` in `src/app/api` or `src/lib`; `NEXT_PUBLIC_*` vars are display strings only (`APP_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `APP_COPYRIGHT`). |
-| Stripe Security | N/A | No Stripe changes (`billing.enabled: false`). |
-| Server/Client Boundary | PASS | The 5 new `"use client"` files import only React, Next navigation, react-hook-form, zod, sonner, lucide, aiden-ui, aiden-realtime/react, `@/components/ui/select`, `@/config/rbac`, and `@/lib/schemas` (zod + rbac only). No server modules. No Server Actions. |
-| Sensitive Data | **FAIL** | 1 HIGH (by this skill's rule): see F2. No Stripe/SendGrid keys, private keys, JWTs, connection strings, or AI API keys in tracked files (`.env.local` is gitignored; `verify.sh` also greps for `sk-ant-…`). |
+| Category | Initial | Findings | Current |
+|----------|--------|----------|---------|
+| Auth & Access Control | PASS | All 8 new/changed DeskLine route files use `withAuth`, validate with `parseRequest`/`parseInput`, and scope every query by org (plus owner for agents) before `assertOwnership` → `assertCan`. Acknowledged public exceptions: `api/auth/[...nextauth]` (Auth.js handler) and `api/auth/register` (rate-limited); both asserted by `verify.sh` E1. NextAuth callbacks unchanged (only an import added to `src/lib/auth.ts`). | PASS |
+| Injection Prevention | PASS | No `$executeRawUnsafe`/`$queryRawUnsafe`, `eval`, `new Function`, or `dangerouslySetInnerHTML` in app code (`src/generated` is the Prisma client). No raw `req.json()`: every body goes through Zod. Prompt injection: see `injection-probe.md` (0/18). | PASS |
+| Data Exposure | **FAIL** | 1 HIGH (by this skill's rule): see F1. All other responses use explicit `select` or hand-built objects; no stack traces in responses (`withAuth` maps known errors; prod 500s are generic); no `console.*` in `src/app/api` or `src/lib`; `NEXT_PUBLIC_*` vars are display strings only (`APP_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `APP_COPYRIGHT`). | **PASS**: F1 resolved in `58b360b` |
+| Stripe Security | N/A | No Stripe changes (`billing.enabled: false`). | N/A |
+| Server/Client Boundary | PASS | The 5 new `"use client"` files import only React, Next navigation, react-hook-form, zod, sonner, lucide, aiden-ui, aiden-realtime/react, `@/components/ui/select`, `@/config/rbac`, and `@/lib/schemas` (zod + rbac only). No server modules. No Server Actions. | PASS |
+| Sensitive Data | **FAIL** | 1 HIGH (by this skill's rule): see F2. No Stripe/SendGrid keys, private keys, JWTs, connection strings, or AI API keys in tracked files (`.env.local` is gitignored; `verify.sh` also greps for `sk-ant-…`). | **PASS**: F2 resolved in `58b360b`; residual exposure F2a closed 2026-10-01 |
 
 ### Dependency Vulnerabilities
 
@@ -40,8 +40,10 @@
 
 - **F1 [HIGH] Data Exposure — `src/app/api/tickets/[id]/route.ts:37`**: `GET` returns the whole ticket row (`{ ...row }`) rather than an explicit `select`. *Today* every column is one the caller is already allowed to see (id, org, owner, subject, body, status, triage, timestamps), so nothing leaks now. The risk is future columns (e.g. internal notes) being exposed by default. **Fix:** `select` the fields the client uses in the `findFirst`, and return that object.
   - **Status:** Resolved in `58b360b`: the ticket query uses an allow-list `select` (`TICKET_FIELDS`); the response now has exactly id, subject, body, status, priority, category, sentiment, ownerId, createdAt, updatedAt (no orgId). Smoke 7/7 after the change; 404 bodies still identical.
-- **F2 [HIGH] Sensitive Data — `prisma/seed.ts:20`**: `SEED_PASSWORD = "DeskLine-dev-2026"` is a hard-coded password for the seeded demo accounts. It's a local fixture (documented in the README; hashes are bcrypt), but if the seed ever ran against production it would create 7 accounts with a publicly known password. **Fix:** read `SEED_PASSWORD` from the environment and refuse to seed when `NODE_ENV=production`.
+- **F2 [HIGH] Sensitive Data — `prisma/seed.ts:20`**: `SEED_PASSWORD = "<redacted>"` was a hard-coded password for the seeded demo accounts. It's a local fixture (documented in the README; hashes are bcrypt), but if the seed ever ran against production it would create 7 accounts with a publicly known password. **Fix:** read `SEED_PASSWORD` from the environment and refuse to seed when `NODE_ENV=production`.
   - **Status:** Resolved in `58b360b`: the password comes from `SEED_PASSWORD` (12+ chars, documented in `.env.example`), and the demo accounts are skipped when `NODE_ENV=production` (RBAC roles still seed). Verified: normal seed OK; missing password stops with an explicit error; production run prints "skipped DeskLine demo data".
+- **F2a [HIGH] Sensitive Data — residual of F2 (found 2026-10-01)**: after `58b360b`, the old literal was still quoted in this report (a tracked file in a public repo), and `.env.local` had been given the *same* value, so the 7 demo accounts still accepted a publicly readable password.
+  - **Status:** Resolved 2026-10-01: `SEED_PASSWORD` rotated to a new random 24-character value (never printed or committed); `aiden_dev` and `aiden_rerun` re-seeded; the literal redacted here. Verified: old password works on 0/7 demo accounts (bcrypt check) and is refused at sign-in; the new one signs in. `verify.sh` now fails if the current `SEED_PASSWORD` value appears in any tracked file. The old value remains in earlier commits (`8a94092`, `58b360b`, `f965929`); it is dead after rotation, so history was not rewritten.
 - **[INFO] `CLAUDE.md`**: 10 added lines are the agent-rules block that `next dev` writes into `CLAUDE.md` itself (see `node_modules/next/dist/server/lib/generate-agent-files.js`). Not a security change.
 
 ---
@@ -61,7 +63,7 @@ Two HIGH code-analysis findings (F1, F2) fail the gate under this skill's rules,
 | Data Exposure | PASS (F1 resolved) |
 | Stripe Security | N/A |
 | Server/Client Boundary | PASS |
-| Sensitive Data | PASS (F2 resolved; no password literals in the diff) |
+| Sensitive Data | PASS (F2 resolved; no password literals in code). See F2a: the report itself still quoted the old value until 2026-10-01 |
 | npm audit / osv-scanner | 0 / 0 |
 
 Also re-run after the fix: `scripts/smoke.sh` 7/7, `scripts/verify.sh` 0 failing checks, `tsc` and lint clean.
