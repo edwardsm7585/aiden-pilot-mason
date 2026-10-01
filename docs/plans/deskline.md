@@ -160,6 +160,16 @@ The starter's `audit.export` and `users.manage` rules keep their global `admin` 
 1. **Query org-filter.** The Prisma `where` always includes the caller's `orgId`, taken from their `Membership` and never from the request. For agents it also includes `ownerId: session.user.id`. This is done by `ticketScope()` in `src/lib/tenancy.ts`, and by an inline `{ id, orgId }` for memberships. A caller with no membership gets the sentinel org `"__none__"`, which matches nothing.
 2. **`assertOwnership` on the result.** A `null` from step 1, whether the row is missing, belongs to another agent, or belongs to another org, throws `OwnershipError`, which becomes the same 404 body every time. Tickets pass through `toOwnable()` first (D1).
 
+**At file:line** (verified at commit `396896a`): step 1 is `src/lib/tenancy.ts:49` `ticketScope()`. Each `[id]` route then does the step-1 read and the step-2 check:
+
+| Route | Step 1 `findFirst` (scoped) | Step 2 `assertOwnership` |
+|---|---|---|
+| `src/app/api/tickets/[id]/route.ts` GET | :42 | :48 |
+| `src/app/api/tickets/[id]/route.ts` PATCH | :61 | :66 |
+| `src/app/api/tickets/[id]/close/route.ts` | :21 | :26 |
+| `src/app/api/tickets/[id]/draft/route.ts` | :32 | :37 |
+| `src/app/api/admin/members/[id]/route.ts` (inline `{ id, orgId }`) | :25 | :30 |
+
 `findUnique({ where: { id } })` is never used for tenant data, and there are no inline `userId ===` comparisons. Writes after the check use the id that was already verified.
 
 **Hardening:**
