@@ -29,3 +29,4 @@ NOTE | 20261001-082921 dirty-tree-test | deliberate test of the new no-skip beha
 20261001-084600 | osv-guard-test | doctor=4 | upgrade-dry-run=0 | tree=dirty(2) | head=a219a57
 NOTE | 20261001-084600 osv-guard-test | deliberate test: osv-scanner hidden, doctor exited 0 but the checkpoint now fails (doctor=4). Also: 082921 and 082944 skipped the CVE scan (shell lost PATH); superseded by the clean run below
 20261001-084929 | rerun-phases1-6 | doctor=0 | upgrade-dry-run=0 | tree=clean | head=ed3c3b6
+20261001-101220 | f3-fix | doctor=0 | upgrade-dry-run=0 | tree=clean | head=825ed3c
