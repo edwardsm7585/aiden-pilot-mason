@@ -1,0 +1,13 @@
+diff --git a/aiden.config.ts b/aiden.config.ts
+index b4970d6..94862f8 100644
+--- a/aiden.config.ts
++++ b/aiden.config.ts
+@@ -93,7 +93,7 @@ export const aidenConfig: AidenConfigShape = {
+     /** Model per provider, used by src/lib/ai.ts for the active provider. */
+     models: {
+       openai: "gpt-4o-mini",
+-      anthropic: "claude-sonnet-4-6",
++      anthropic: "claude-opus-4-6",
+       google: "gemini-2.5-flash",
+       mistral: "mistral-small-latest",
+       groq: "llama-3.3-70b-versatile",
