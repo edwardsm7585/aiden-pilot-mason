@@ -74,16 +74,17 @@ Retention and archival are customer-owned (D7). By default, `AuditLog` rows stay
 
 ## Evidence
 
-| Where                                                                                    | What                                                                                         |
-| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [`docs/evidence/rerun-2026-10-01b/`](docs/evidence/rerun-2026-10-01b/README.md)          | **Latest full re-run of Phases 0–6**, every suite on fresh databases                         |
-| [`docs/evidence/security-review.md`](docs/evidence/security-review.md)                   | `/security-review`: findings F1–F5, each fixed and verified. Verdict: PASS, no open findings |
-| [`docs/evidence/security-guide-checklist.md`](docs/evidence/security-guide-checklist.md) | Every section of the AIDEN security guide against the code                                   |
-| [`docs/evidence/design-system-checklist.md`](docs/evidence/design-system-checklist.md)   | Every design-system rule against the UI                                                      |
-| [`docs/evidence/injection-probe.md`](docs/evidence/injection-probe.md)                   | Formal prompt-injection probe: 0 of 18 calls followed                                        |
-| [`docs/evidence/rollback-rehearsal.md`](docs/evidence/rollback-rehearsal.md)             | Rollback (plan §7) rehearsed on a throwaway branch and database                              |
-| `docs/evidence/screenshots/`                                                             | UI for every persona, plus Prisma Studio tables and request traces per phase                 |
-| `docs/evidence/checkpoints/`                                                             | Every `aiden doctor` and upgrade dry-run, with a note explaining any non-green run           |
+| Where                                                                                    | What                                                                                                                              |
+| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [`docs/evidence/fresh-clone-walkthrough.txt`](docs/evidence/fresh-clone-walkthrough.txt) | **This README followed literally on a fresh clone from GitHub**: install, migrate, seed, doctor, run, smoke 7/7, verify 0 failing |
+| [`docs/evidence/rerun-2026-10-01b/`](docs/evidence/rerun-2026-10-01b/README.md)          | **Latest full re-run of Phases 0–6**, every suite on fresh databases                                                              |
+| [`docs/evidence/security-review.md`](docs/evidence/security-review.md)                   | `/security-review`: findings F1–F5, each fixed and verified. Verdict: PASS, no open findings                                      |
+| [`docs/evidence/security-guide-checklist.md`](docs/evidence/security-guide-checklist.md) | Every section of the AIDEN security guide against the code                                                                        |
+| [`docs/evidence/design-system-checklist.md`](docs/evidence/design-system-checklist.md)   | Every design-system rule against the UI                                                                                           |
+| [`docs/evidence/injection-probe.md`](docs/evidence/injection-probe.md)                   | Formal prompt-injection probe: 0 of 18 calls followed                                                                             |
+| [`docs/evidence/rollback-rehearsal.md`](docs/evidence/rollback-rehearsal.md)             | Rollback (plan §7) rehearsed on a throwaway branch and database                                                                   |
+| `docs/evidence/screenshots/`                                                             | UI for every persona, plus Prisma Studio tables and request traces per phase                                                      |
+| `docs/evidence/checkpoints/`                                                             | Every `aiden doctor` and upgrade dry-run, with a note explaining any non-green run                                                |
 
 ## Known limitations
 

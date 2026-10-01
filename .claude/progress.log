@@ -24,3 +24,4 @@
 [2026-10-01 12:25] completed verify(rerun-b): phases 0-6 re-run on fresh DBs at d501242 — all pass (smoke 7/7, matrix 37/37, DS 17/17, F3 17/17, F4 12/12, guide 18/18, injection 0/18, rollback identical SQL, 37 audit rows kept)
 [2026-10-01 13:32] completed docs(submission): Phase 7 — README (run, seeded logins, provider switch lines, audit sink, verify, evidence index, limitations), scripts/smoke-local.sh, no-op labels for all dry-runs, upstream item 16 (aiden migrate silent no-op on Windows)
 [2026-10-01 13:47] completed fix(starter): fresh-clone README walkthrough found postinstall silent no-op on Windows (no Prisma client) and .env.example brand override; fixed + README step 3; upstream items 16-18
+[2026-10-01 13:50] completed docs(submission): Phase 7 done — README walkthrough on a fresh GitHub clone passes end to end (install, migrate, seed, doctor 5/5, DeskLine brand, smoke 7/7, verify 0)
