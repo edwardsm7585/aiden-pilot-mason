@@ -14,15 +14,23 @@ export const ListTicketsQuery = z.object({
   status: z.enum(["open", "pending", "closed"]).optional(),
 });
 
-export const CreateTicketBody = z.object({
-  subject: z.string().trim().min(1).max(200),
-  body: z.string().trim().min(1).max(10_000),
-});
+const Subject = z
+  .string()
+  .trim()
+  .min(1, "Enter a subject")
+  .max(200, "Keep the subject under 200 characters");
+const Body = z
+  .string()
+  .trim()
+  .min(1, "Enter the customer’s message")
+  .max(10_000, "Keep the message under 10,000 characters");
+
+export const CreateTicketBody = z.object({ subject: Subject, body: Body });
 
 export const UpdateTicketBody = z
   .object({
-    subject: z.string().trim().min(1).max(200).optional(),
-    body: z.string().trim().min(1).max(10_000).optional(),
+    subject: Subject.optional(),
+    body: Body.optional(),
     status: z.enum(["open", "pending"]).optional(),
   })
   .refine((v) => Object.keys(v).length > 0, "At least one field required");

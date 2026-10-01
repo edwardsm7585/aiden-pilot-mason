@@ -2,8 +2,8 @@ import type { DashboardNavItem } from "@upstart13-com/aiden-ui";
 
 /**
  * Source of truth for the dashboard sidebar navigation. Imported by
- * the layout, which decides at render-time whether the user can see
- * each item (e.g. the Admin → Users entry is gated by `users.manage`).
+ * the app shell, which decides at render-time whether the user can see
+ * each item (admin entries are gated by abilities).
  *
  * Icon names are resolved against `defaultNavIconRegistry` from
  * `@upstart13-com/aiden-ui` at render time. Pass a custom registry to
@@ -13,10 +13,10 @@ import type { DashboardNavItem } from "@upstart13-com/aiden-ui";
 
 export const primaryNavItems: DashboardNavItem[] = [
   {
-    href: "/dashboard",
-    label: "Overview",
-    icon: "LayoutDashboard",
-    exact: true,
+    href: "/dashboard/tickets",
+    label: "Tickets",
+    icon: "Inbox",
+    exact: false,
   },
 ];
 
@@ -27,9 +27,17 @@ export const settingsNavItem: DashboardNavItem = {
   exact: false,
 };
 
+/** Starter screen for the global `admin` role (`users.manage`). */
 export const adminUsersNavItem: DashboardNavItem = {
   href: "/admin/users",
   label: "Users",
   icon: "Users",
   exact: false,
 };
+
+/** DeskLine owner-only admin screens (`member.manage` / `audit.read` / `usage.read`). */
+export const orgAdminNavItems: DashboardNavItem[] = [
+  { href: "/admin/members", label: "Members", icon: "Users", exact: false },
+  { href: "/admin/audit", label: "Audit log", icon: "Shield", exact: false },
+  { href: "/admin/cost", label: "AI cost", icon: "Receipt", exact: false },
+];

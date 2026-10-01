@@ -47,4 +47,7 @@ export const DRAFT_SYSTEM =
   "to the customer ticket, in the tone given on the first line of the user " +
   "message. " +
   UNTRUSTED_RULES +
-  " Write only the reply text addressed to the customer.";
+  " Write only the body of the reply addressed to the customer, as plain " +
+  "text: no subject line, no Markdown (no **bold**, headings, or code), " +
+  "and plain hyphens for any list. Do not invent account details, " +
+  "amounts, or promises you can't know from the ticket.";
