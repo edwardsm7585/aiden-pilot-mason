@@ -8,3 +8,4 @@
 [2026-09-30 18:40] completed fix(lib): phase 3 double-check — dev server verified (headers, auth redirect, login); fixed sink registration (audit rows were never written) and Next 16 async headers() in audit meta; deviations 8–9
 [2026-09-30 18:55] completed feat(api): Phase 4 — 10 routes; smoke 7/7 + 36 extended probes; AIUsage verified for triage and end-of-stream draft (user attributed, request_id joins audit)
 [2026-09-30 19:20] completed docs(evidence): phase 4 double-check (0 server errors, audit metadata clean) + Prisma Studio PNGs of all 14 tables, schema visualizer, request trace
+[2026-10-01 00:10] completed feat(ui): Phase 5 — tickets list/detail, streaming draft panel, members/audit/cost; 26 UI PNGs (3 personas, dark, mobile, interactions) + Studio PNGs + trace; smoke 7/7; deviations 10–18

@@ -237,6 +237,14 @@ Events are emitted with `auditLog()` from `@/lib/security`. `timestamp`, `reques
 | `src/app/admin/members/page.tsx`, `role-select.tsx` | **new**: members table and role `Select` |
 | `src/app/admin/audit/page.tsx` | **rewrite**: org-scoped audit table |
 | `src/app/admin/cost/page.tsx` | **new**: metric cards and recent-usage table |
+| `src/components/app-shell.tsx` | **new**: shared signed-in chrome for `/dashboard` and `/admin` (deviation 10) |
+| `src/app/dashboard/page.tsx` | redirect to `/dashboard/tickets` (deviation 11) |
+| `src/lib/deskline-data.ts` | **new**: org-scoped read queries shared by routes and pages (deviation 16) |
+| `src/lib/format.ts` | **new**: DS date / number / currency formatting |
+| `src/components/tickets/ticket-badges.tsx` | **new**: status / priority / category / sentiment badges |
+| `src/app/dashboard/tickets/loading.tsx`, `[id]/loading.tsx`, `[id]/not-found.tsx` | **new**: skeletons and the not-found empty state |
+| `src/components/ui/select.tsx`, `components.json` | **new**: shadcn Select, themed (deviation 13) |
+| `src/app/icon.svg` | **new**: favicon (starter shipped none, so every page logged a 404) |
 | `scripts/smoke.sh`, `scripts/verify.sh` | **new**: the Phase 6 suites |
 | `.gitignore` | add `.audit/` |
 | `docs/evidence/**` | checkpoint and verification evidence |
@@ -306,6 +314,15 @@ Must be dated **before** the first UI commit.
 | 7 | 2026-09-30 | The SDK default CSP (`script-src 'self'`) blocks App Router hydration and next-themes' inline scripts; `securityHeaders` takes a static CSP (no nonce) | `proxy = securityHeaders(...)` with defaults | `src/proxy.ts` passes the default CSP with `script-src 'self' 'unsafe-inline'` (+ `'unsafe-eval'` in dev only); all other headers unchanged. Upstream: nonce support. Confirmed against the dev server: pages 200, all headers present. | Yes: §4 |
 | 8 | 2026-09-30 | Dev-server check: a real sign-in produced **no** `audit_logs` row. It went to aiden-security's log-only fallback sink, because Next bundles `instrumentation.ts` separately, so routes get their own aiden-security instance and never see the sink it registers. Marking the aiden-* packages as `serverExternalPackages` failed: `aiden-security/dist/middleware.js` imports `next/server` without `.js`, which native ESM rejects (every page 500). | Sinks registered only from `instrumentation.ts`; `src/lib/auth.ts` untouched | `src/lib/auth.ts` imports `@/lib/audit`, and `src/lib/ai.ts` imports `@/lib/ai-usage`, so both sinks register in the route module graph. Verified: `auth.signin` and `security.ability_denied` rows persist. | Yes: §6 |
 | 9 | 2026-09-30 | The starter's `captureRequestMeta` calls `headers()` synchronously; in Next 16 it returns a Promise, so every audit event logged a sync-dynamic-API error and `ip_address`/`user_agent` were always NULL. The SDK calls the hook synchronously. | `src/lib/audit.ts`: add jsonl branch only | The sink awaits `headers()` first, then calls the SDK's `createPrismaAuditSink` with the captured values. Verified: IP and UA persisted, 0 errors. | Yes: §6 |
+| 10 | 2026-09-30 | The starter's `/admin` layout only guards the route and renders no sidebar, so admin pages had no navigation | `src/app/admin/layout.tsx`: gate change only | New `src/components/app-shell.tsx` (DashboardNav + DashboardHeader + Toaster, admin entries ability-gated) used by both `/dashboard` and `/admin` layouts | Yes: §6 |
+| 11 | 2026-09-30 | Starter `/dashboard` is a placeholder overview | Not in §6 | `src/app/dashboard/page.tsx` redirects to `/dashboard/tickets` (DeskLine's home) | Yes: §6 |
+| 12 | 2026-09-30 | aiden-ui `AuditLogTable` has no request-id column, which is the key that joins an audit event to its AIUsage row (the trace) | Audit page via aiden-ui | Audit page built on DS `Table` primitives with the same event→badge mapping, plus a Request column | Yes: §6 |
+| 13 | 2026-09-30 | `npx shadcn add select` (no `components.json` in the starter) misresolved the `@/lib/utils` alias and **installed an unrelated npm package named `cn`**, then imported it | DS: install shadcn Select, theme with tokens | Uninstalled `cn`; repointed `select.tsx` to aiden-ui's `cn`; set `components.json` `aliases.utils` to `@upstart13-com/aiden-ui` so future adds can't repeat it; Lucide icons set to `strokeWidth={1.5}` | Yes: §6 |
+| 14 | 2026-09-30 | `DashboardNav` exposes no slot for `ThemeToggle`; aiden-ui only renders it in the mobile `DashboardHeader` | Runbook: ThemeToggle in the site header | Theme switches via the mobile header toggle and Settings → Appearance (starter). SDK gap raised rather than forking the nav | Yes: §6 |
+| 15 | 2026-09-30 | Browser review: drafts came back with Markdown (`**bold**`) and a "Subject:" line, shown raw in the plain-text panel | `DRAFT_SYSTEM` without output-format rules | `DRAFT_SYSTEM` now requires plain text, no subject line, hyphen lists, and no invented account details; re-verified in the browser | Yes: AI safety |
+| 16 | 2026-09-30 | Server pages and API routes would have duplicated the org-scoped list/audit/usage queries | Queries inline in routes | `src/lib/deskline-data.ts` (`listTickets`, `listMembers`, `listOrgAudit`, `getOrgUsage`) used by both; the 4 list routes refactored (check order unchanged; smoke re-run 7/7). `[id]` routes keep their explicit `findFirst` + `assertOwnership` | Yes: §6 |
+| 17 | 2026-09-30 | Sidebar showed "Mason Aiden Certificate": `NEXT_PUBLIC_APP_NAME` in `.env.local` overrides `aiden.config.ts` `app.name` | Brand from config | Local `.env.local` value set to `DeskLine` (not committed) | n/a |
+| 18 | 2026-09-30 | Seeded tickets have no triage (the seed doesn't call AI), so list/detail showed "—" | n/a | Triaged the 6 seed tickets through the real API (`PATCH` with unchanged subject, as each owning agent), which also exercises `ticket.update` → `ai.classify`. The injection ticket came back `medium`, not the `urgent` it demands | n/a |
 
 ## Verify-against-plan record
 
