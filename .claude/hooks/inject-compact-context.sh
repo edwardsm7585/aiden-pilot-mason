@@ -27,19 +27,19 @@ CODE STYLE
 - Files: kebab-case.ts — routes follow App Router conventions
 - Prefix unused params with _
 
-UI / DESIGN SYSTEM (read docs/design-system/ before ANY UI work)
+UI / DESIGN SYSTEM (invoke /frontend-design + read docs/design-system/00-overview.md and the relevant DS files before ANY UI work)
 - NEVER hardcode colors — use CSS variable tokens: bg-background, text-foreground, text-muted-foreground, bg-primary, bg-accent, bg-destructive, border-border
 - NEVER use bg-gray-*, text-zinc-*, border-slate-* — semantic tokens only
-- NEVER use rounded-lg, rounded-xl, rounded-2xl — use rounded-sm (4px). Avatars only: rounded-full
-- shadcn/ui is the component library — always use it before building custom components
+- Radius scale: rounded-sm (4px) default · rounded-md inputs · rounded-lg buttons/badges · rounded-xl cards · rounded-2xl modals · rounded-full only avatars/dot indicators · never above rounded-2xl
+- @upstart13-com/aiden-ui first (themed shadcn primitives); raw shadcn only when aiden-ui lacks it (npx shadcn@latest add <c>, then theme with tokens)
 - Lucide icons only — strokeWidth={1.5}, default size-4
-- Every page needs a header: border-b border-border px-6 py-5
+- Every page has a PageHeader from @upstart13-com/aiden-ui (border-b border-border px-6 py-5)
 - One primary CTA per section — everything else is secondary or ghost
 - Mobile + tablet + desktop responsive required
 
 ARCHITECTURE
 - Auth: NextAuth v5 · src/lib/auth.ts · custom pages at /login
-- Database: Prisma + PostgreSQL · client: src/lib/prisma.ts · schema: prisma/schema.prisma
+- Database: Prisma + PostgreSQL · client: src/lib/prisma.ts · schema changes go in prisma/fragments/*.prisma (prisma/schema.prisma is generated)
 - NEVER import Prisma client in browser code
 - Payments: Stripe · src/lib/stripe.ts · server-side only
 - API routes: src/app/api/ · return NextResponse.json()

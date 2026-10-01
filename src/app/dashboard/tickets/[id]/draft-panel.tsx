@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAIStream } from "@upstart13-com/aiden-realtime/react";
 import { toast } from "sonner";
 import { Copy, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { selectedPill } from "@/components/selected-pill";
 import {
   Button,
   Card,
@@ -67,22 +68,19 @@ export function DraftPanel({ ticketId }: { ticketId: string }) {
             className="flex flex-wrap gap-2"
           >
             {TONES.map((t) => (
-              <button
+              <Button
                 key={t.value}
                 type="button"
                 role="radio"
                 aria-checked={tone === t.value}
                 disabled={isLoading}
                 onClick={() => setTone(t.value)}
-                className={cn(
-                  "focus-visible:ring-ring rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50",
-                  tone === t.value
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                )}
+                size="sm"
+                variant="outline"
+                className={cn(tone === t.value && selectedPill)}
               >
                 {t.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

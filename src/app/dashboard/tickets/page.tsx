@@ -21,6 +21,7 @@ import { abilities } from "@/lib/abilities";
 import { getMembership, orgSession } from "@/lib/tenancy";
 import { listTickets, type TicketStatus } from "@/lib/deskline-data";
 import { ListTicketsQuery } from "@/lib/schemas";
+import { selectedPill } from "@/components/selected-pill";
 import { prisma } from "@/lib/prisma";
 import { formatRelative } from "@/lib/format";
 import {
@@ -84,23 +85,26 @@ export default async function TicketsPage({
             {FILTERS.map((f) => {
               const active = f.status === status;
               return (
-                <Link
+                // DS 02: outline buttons for filter controls; the active one
+                // gets the DS violet pill (DS 06).
+                <Button
                   key={f.label}
-                  href={
-                    f.status
-                      ? `/dashboard/tickets?status=${f.status}`
-                      : "/dashboard/tickets"
-                  }
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "focus-visible:ring-ring rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                    active
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                  )}
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className={cn(active && selectedPill)}
                 >
-                  {f.label}
-                </Link>
+                  <Link
+                    href={
+                      f.status
+                        ? `/dashboard/tickets?status=${f.status}`
+                        : "/dashboard/tickets"
+                    }
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {f.label}
+                  </Link>
+                </Button>
               );
             })}
           </nav>

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Users } from "lucide-react";
 import {
+  Button,
   PageHeader,
   Table,
   TableBody,
@@ -34,7 +36,7 @@ export default async function MembersPage() {
         title="Members"
         subtitle="Choose what each person can do. Changes apply on their next request."
       />
-      <div className="space-y-4 px-6 py-8">
+      <div className="space-y-8 px-6 py-8">
         {members.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted mb-4 rounded-sm p-3">
@@ -44,6 +46,9 @@ export default async function MembersPage() {
             <p className="text-muted-foreground mt-1 max-w-xs text-sm">
               People appear here once they join your organisation.
             </p>
+            <Button asChild variant="outline" size="sm" className="mt-4">
+              <Link href="/dashboard/tickets">Go to tickets</Link>
+            </Button>
           </div>
         ) : (
           <div className="border-border overflow-x-auto rounded-sm border">

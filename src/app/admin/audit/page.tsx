@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ScrollText } from "lucide-react";
 import {
+  Button,
   Badge,
   PageHeader,
   Table,
@@ -67,6 +69,9 @@ export default async function AuditPage() {
               Sign-ins, ticket changes, and AI calls by your members will be
               recorded here.
             </p>
+            <Button asChild variant="outline" size="sm" className="mt-4">
+              <Link href="/dashboard/tickets">Go to tickets</Link>
+            </Button>
           </div>
         ) : (
           <div className="border-border overflow-x-auto rounded-sm border">

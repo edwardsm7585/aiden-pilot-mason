@@ -59,7 +59,9 @@ export function ProfileSection({ user }: ProfileSectionProps) {
         description:
           res.status === 400
             ? "Please check the fields below."
-            : "Something went wrong. Please try again.",
+            : res.status === 401
+              ? "Your session has ended. Sign in again to save your name."
+              : "The server couldn't save your profile. Your changes are still in the form; select Save again.",
       });
       return;
     }

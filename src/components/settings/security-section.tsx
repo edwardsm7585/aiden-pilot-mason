@@ -177,7 +177,7 @@ function PasswordChangeForm() {
       } | null;
       const message =
         (data?.code && PASSWORD_ERROR_COPY[data.code]) ??
-        "Could not change password. Please try again.";
+        "The server couldn't change your password, so your current password still works. Try again in a minute.";
       if (data?.code === "wrong_password") {
         form.setError("currentPassword", { message });
       } else if (data?.code === "weak") {

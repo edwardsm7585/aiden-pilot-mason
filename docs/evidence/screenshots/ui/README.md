@@ -31,5 +31,11 @@ Captured with headless Chrome using real credential sign-ins (`authjs.session-to
 | `28-login-wrong-password-toast.png` | (signed out) | Wrong password: the toast now appears (no Toaster on auth pages before) |
 | `29-login-rate-limited.png` | (signed out) | Sign-in after the per-account limit: 429, form stays usable; SDK form's generic text (F4) |
 | `30-owner-audit-spend-alert.png` | owner | `ai.spend_alert` (amber) sharing a request id with the draft that crossed the threshold; sign-in/sign-out rows now carry request ids |
+| `31-ds-filter-buttons.png` | agent1 | Status filters as aiden-ui outline Buttons; the active filter (Pending) uses the DS violet pill; empty state with its action |
+| `32-ds-reply-tab-tone-buttons.png` | agent1 | Reply tab: tone picker as Buttons, selected tone in the violet pill, finished draft |
+| `33-ds-edit-tab.png` | agent1 | Edit ticket tab (Details stays in the sidebar) |
+| `34-ds-theme-dark.png` | owner | ThemeSelector set to Dark: `<html>` gets `.dark`, every surface follows the tokens |
+| `35-ds-mobile-detail-tabs.png` | owner | Ticket detail with tabs at 390 px, no horizontal scroll |
+| `36-ds-empty-state-action.png` | Globex owner | AI cost empty state: icon, title, description and an action (DS 05) |
 
 DB state and request traces after these runs: `../db-phase5/`.

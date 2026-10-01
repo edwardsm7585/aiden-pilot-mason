@@ -61,7 +61,10 @@ function ExportCard() {
       const res = await fetch("/api/me/export", { method: "POST" });
       if (!res.ok) {
         toast.error("Could not export data", {
-          description: "Please try again in a moment.",
+          description:
+            res.status === 401
+              ? "Your session has ended. Sign in again, then export."
+              : "The server couldn't build your export. Wait a minute, then select Export JSON again.",
         });
         return;
       }
@@ -211,8 +214,8 @@ function DeleteAccountDialog({
           <DialogTitle>Delete your account?</DialogTitle>
           <DialogDescription>
             This permanently removes your profile, OAuth connections, and
-            sessions. Tickets you own move to an owner of your organisation,
-            and audit log entries are kept. This cannot be undone.
+            sessions. Tickets you own move to an owner of your organisation, and
+            audit log entries are kept. This cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

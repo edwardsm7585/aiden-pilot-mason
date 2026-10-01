@@ -1,0 +1,36 @@
+# Design-system runtime checks — 2026-10-01 11:16:13, production build (next start), aiden_rerun rebuilt from zero
+
+Real browser (Chrome), signed in through the login form per persona.
+
+| Check | Expected | Got | |
+|---|---|---|---|
+| status filters are aiden-ui Buttons (data-slot=button) | 4/4 | 4/4 | ok |
+| active filter marked aria-current=page | All | All | ok |
+| Pending filter navigates + becomes current | ?status=pending Pending | ?status=pending Pending | ok |
+| detail page tabs (agent) | Reply:true,Edit ticket:false | Reply:true,Edit ticket:false | ok |
+| tone picker = aiden-ui Buttons as radios | Friendly:true:button,Formal:false:button,Concise:false:button | Friendly:true:button,Formal:false:button,Concise:false:button | ok |
+| selecting Formal updates aria-checked | true | true | ok |
+| Edit tab shows the edit form | true | true | ok |
+| draft still there after Edit → Reply (forceMount) | 1021 | 1021 | ok |
+| Details card visible on Reply tab | true | true | ok |
+| viewer: no tabs on detail page | 0 | 0 | ok |
+| ThemeSelector Dark flips <html> class | dark | dark | ok |
+| ThemeSelector Light flips it back | light | light | ok |
+| no horizontal page scroll at 390px (10 pages) | none | none | ok |
+| no horizontal page scroll at 820px (10 pages) | none | none | ok |
+| no horizontal page scroll at 1440px (10 pages) | none | none | ok |
+| signed-out pages: no horizontal scroll at 390px | none | none | ok |
+| signed-out pages: no horizontal scroll at 1440px | none | none | ok |
+
+== 17 passed, 0 failed
+page/console errors: none
+
+## Tone buttons around a draft (disabled only while streaming)
+
+```
+before draft: Friendly:enabled:1 Formal:enabled:1 Concise:enabled:1
+while streaming: Friendly:disabled:0.5 Formal:disabled:0.5 Concise:disabled:0.5
+right after done: Friendly:enabled:0.500822 Formal:enabled:0.500822 Concise:enabled:0.500822
+1.5s after done: Friendly:enabled:1 Formal:enabled:1 Concise:enabled:1
+can switch tone after draft: Concise
+```

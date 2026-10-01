@@ -17,3 +17,8 @@
 - **[2026-10-01]** No `<Toaster />` on auth pages: sign-in errors were invisible
   - **Symptom**: the SDK `LoginForm` calls `toast.error("Invalid email or password")`, but nothing appeared on `/login`; the starter mounted `<Toaster />` only in the dashboard shell.
   - **Fix**: mount it once in `src/app/layout.tsx` (DS 07: "Mount the themed `<Toaster />` once in your root layout") and remove the shell's copy.
+
+- **[2026-10-01]** Hand-built choice controls copied from the starter
+  - **Symptom**: the starter's Admin → Users role toggles are raw `<button>`s with an inverted `bg-foreground` selected state and no focus ring; DeskLine's status filter and tone picker copied that look. DS 02 says filter/category controls are `Button variant="outline"`, and DS 06 says active items use the violet pill, not inverted surfaces.
+  - **Fix**: `<Button variant="outline" size="sm" className={cn(selected && selectedPill)}>` (`src/components/selected-pill.ts`: `bg-sidebar-accent text-sidebar-accent-foreground`). `verify.sh` now fails on raw HTML controls outside `src/components/ui/`.
+  - **Also**: the starter's `.claude/hooks/inject-compact-context.sh` re-injected wrong DS rules after compaction (banned `rounded-lg/xl/2xl`; "shadcn/ui first"). It's aligned with CLAUDE.md now; raise upstream.

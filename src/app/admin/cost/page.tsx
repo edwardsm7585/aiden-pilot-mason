@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Receipt } from "lucide-react";
 import {
+  Button,
   Card,
   PageHeader,
   Table,
@@ -78,6 +80,9 @@ export default async function CostPage() {
               Spend appears here after the first ticket is triaged or a reply
               is drafted.
             </p>
+            <Button asChild variant="outline" size="sm" className="mt-4">
+              <Link href="/dashboard/tickets">Go to tickets</Link>
+            </Button>
           </div>
         ) : (
           <>

@@ -8,7 +8,6 @@ import {
   AvatarImage,
   Badge,
   Button,
-  cn,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,7 +25,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  cn,
 } from "@upstart13-com/aiden-ui";
+import { selectedPill } from "@/components/selected-pill";
 import { toast } from "sonner";
 
 interface UserRow {
@@ -71,7 +72,14 @@ export function UsersTable({
       params.set("limit", "25");
       const res = await fetch(`/api/admin/users?${params.toString()}`);
       if (!res.ok) {
-        toast.error("Search failed");
+        toast.error("Couldn't search users", {
+          description:
+            res.status === 400
+              ? "Searches can be up to 200 characters. Shorten it and search again."
+              : res.status === 401 || res.status === 403
+                ? "Your session ended or you no longer manage users. Sign in again."
+                : "The server couldn't run the search. Refresh the page and search again.",
+        });
         return;
       }
       const data = (await res.json()) as {
@@ -405,19 +413,17 @@ function RoleEditDialog({
               {availableRoles.map((role) => {
                 const isSelected = selected.includes(role.name);
                 return (
-                  <button
+                  <Button
                     key={role.name}
                     type="button"
+                    size="sm"
+                    variant="outline"
+                    className={cn(isSelected && selectedPill)}
+                    aria-pressed={isSelected}
                     onClick={() => toggle(role.name)}
-                    className={cn(
-                      "rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors",
-                      isSelected
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                    )}
                   >
                     {role.name}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
