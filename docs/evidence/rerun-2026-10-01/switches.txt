@@ -1,0 +1,33 @@
+# Phase 6 switch re-runs 2026-10-01 08:41:10 — dev server, aiden_rerun
+
+## 1. One-line model switch (sonnet-4-6 -> opus-4-6)
+```diff
+warning: in the working copy of 'aiden.config.ts', LF will be replaced by CRLF the next time Git touches it
+-      anthropic: "claude-sonnet-4-6",
++      anthropic: "claude-opus-4-6",
+```
+create: HTTP 201
+draft: 1 done event
+newest AIUsage rows (model | tokens | cost | event):
+claude-opus-4-6 | in 207 out 146 | $0.014055 | ai.draft
+claude-opus-4-6 | in 243 out 16 | $0.004845 | ai.classify
+reverted: git diff lines = 0
+
+## 2. AI kill-switch (providers.anthropic: false)
+```diff
+warning: in the working copy of 'aiden.config.ts', LF will be replaced by CRLF the next time Git touches it
+-      anthropic: true,
++      anthropic: false,
+```
+create: HTTP 201 body: {"ticket":{"id":"cmupn6zc30000ukfbomslkkp7","status":"open","priority":null,"category":null,"sentiment":null}}
+audit for that request: ticket.create {"status": "open"} ; ai.classify {"ok": false}
+draft: {"error":"AI unavailable"} HTTP 503
+AIUsage rows added: 0 (expected 0)
+reverted: git diff lines = 0
+
+## 3. Audit sink swap (AUDIT_SINK=jsonl)
+PATCH status: HTTP 200
+audit_logs rows added: 0 (expected 0)
+jsonl lines: 1; events: ticket.update
+git status (.audit/ must be ignored): ''
+dev restarted on the Postgres sink

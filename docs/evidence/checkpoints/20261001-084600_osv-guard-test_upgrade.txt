@@ -1,0 +1,11 @@
+head: a219a57
+tree: dirty(2)
+uncommitted:
+ M scripts/checkpoint.sh
+?? docs/evidence/rerun-2026-10-01/
+
+aiden upgrade (dry-run)
+
+Current version: 2.0.1
+Target version:  2.0.1
+✓ Already up to date.

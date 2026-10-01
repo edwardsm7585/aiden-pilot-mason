@@ -1,0 +1,22 @@
+# Production server re-run 2026-10-01 08:44:01 — next start (NODE_ENV=production), aiden_rerun, fresh sign-ins with the rotated SEED_PASSWORD
+
+## smoke.sh
+PASS 1 unauthenticated GET /api/tickets (401)
+PASS 2 malformed create body (400)
+PASS 3 cross-tenant GET (404)
+PASS 4 IDOR PATCH other agent same-org (404)
+PASS 5 missing id (404)
+PASS 6 viewer POST draft (403)
+PASS 7 404 bodies identical (no enumeration leak)
+== 7 passed, 0 failed
+
+## security headers (GET /login)
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'
+permissions-policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-frame-options: DENY
+
+## error bodies are generic (no stack)
+malformed JSON body: {"error":{"formErrors":["Request body is not valid JSON"],"fieldErrors":{}}} HTTP 400

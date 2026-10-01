@@ -1,0 +1,39 @@
+# Phase 3 re-run 2026-10-01 08:33:07
+## tsc
+tsc exit=0
+## lint
+lint exit=0
+## verify.sh
+ok:   route without withAuth (E1 excluded)
+ok:   E1: nextauth route only re-exports handlers
+ok:   E1: register route is rate-limited
+ok:   raw req.json()
+ok:   inline owner comparison
+ok:   findUnique on tenant tables in routes
+ok:   no-ship sinks
+ok:   server-only in client files
+ok:   console.log in API
+ok:   logged bodies/prompts
+ok:   direct LLM fetch / vendor SDK
+ok:   hand-rolled SSE / WebSocket
+ok:   JSON.parse/regex on AI output
+ok:   createLogger count != 1
+ok:   createAuth count != 1
+ok:   createAIClient count != 1 (E3)
+ok:   duplicate aiden-logging install (E4)
+ok:   hardcoded color classes
+ok:   raw hex in TSX
+ok:   off-scale radius
+ok:   non-Lucide icons
+ok:   strokeWidth not 1.5
+ok:   ThemeProvider missing at root
+ok:   globals.css not imported
+ok:   page without PageHeader (E2 excluded)
+ok:   E2: redirect-only pages render nothing else
+ok:   E2: settings layout renders PageHeader
+ok:   .env committed
+ok:   API key pattern in tracked files
+ok:   next-env.d.ts tracked or not ignored
+ok:   schema.prisma hand-edited
+== 0 failing checks
+verify exit=0

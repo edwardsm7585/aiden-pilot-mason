@@ -14,3 +14,4 @@
 [2026-10-01 00:50] completed chore(verify): Phase 6 — verify.sh 0 fails (asserted exceptions), injection probe 0/18, model switch + kill-switch + jsonl sink, prod build/headers/smoke, security review PASS after fixes, rollback rehearsal on throwaway branch, plan record + deviations 19–24, Studio PNGs + 55-row trace
 [2026-10-01 08:29] completed fix(checkpoint): next-env.d.ts guarded as untracked/ignored; upgrade dry-run never skipped on dirty tree — build+dev leave tree clean, guards proven
 [2026-10-01 08:43] completed security(seed): closed F2 residual — rotated SEED_PASSWORD, re-seeded, redacted security-review.md, verify.sh guard for live value in tracked files — old password 0/7, guard proven
+[2026-10-01 08:49] completed verify(rerun): phases 1-6 re-run on fresh DB aiden_rerun — all pass; fixed F2a seed password exposure and silent osv skip in checkpoint

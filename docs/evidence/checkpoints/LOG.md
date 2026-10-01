@@ -26,3 +26,5 @@ NOTE | 20260930-181749 phase6a / 181752 phase6b | upgrade skipped: next-env.d.ts
 20261001-082921 | dirty-tree-test | doctor=0 | upgrade-dry-run=0 | tree=dirty(2) | head=3b36cbe
 NOTE | 20261001-082921 dirty-tree-test | deliberate test of the new no-skip behaviour: dry-run ran (0) on an uncommitted tree, then the checkpoint failed as designed. Rows from here on carry tree= and head=
 20261001-082944 | phase6d-no-skip | doctor=0 | upgrade-dry-run=0 | tree=clean | head=8fb83a3
+20261001-084600 | osv-guard-test | doctor=4 | upgrade-dry-run=0 | tree=dirty(2) | head=a219a57
+NOTE | 20261001-084600 osv-guard-test | deliberate test: osv-scanner hidden, doctor exited 0 but the checkpoint now fails (doctor=4). Also: 082921 and 082944 skipped the CVE scan (shell lost PATH); superseded by the clean run below

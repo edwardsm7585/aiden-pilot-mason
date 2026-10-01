@@ -1,0 +1,14 @@
+# Rollback rehearsal re-run 2026-10-01 08:47:17
+
+Throwaway worktree `../deskline-rollback` (branch `rollback-rehearsal-2`, never pushed, removed afterwards); code restored to `cb67bd6` (`src`, `prisma/fragments`, `aiden.config.ts`); database `aiden_rollback` = `createdb -T aiden_rerun` (dropped afterwards). Drop migration generated with `prisma migrate diff ... --script --output` (no dotenv banner this time); identical to `../rollback-drop-migration.sql` apart from a trailing blank line. Applied with `prisma migrate deploy`. App booted with `next dev --webpack` (worktree node_modules junction; see original rehearsal note).
+
+| Check | Before | After |
+|---|---|---|
+| tables | 13 | 9 |
+| audit_logs | 86 | 86 |
+| deskline_events | 51 | 51 |
+| users | 8 | 8 |
+| DeskLine tables (orgs, memberships, tickets, ai_usage) | 4 | 0 |
+| sign-in owner@acme.test (rotated SEED_PASSWORD) | | 302, /api/me 200 |
+| /login, /dashboard | | 200, 200 |
+| /dashboard/tickets, /api/tickets, /admin/members | | 404, 404, 404 |

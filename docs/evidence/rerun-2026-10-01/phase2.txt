@@ -1,0 +1,53 @@
+# Phase 2 re-run 2026-10-01 08:32:53 — fresh database aiden_rerun
+## prisma:merge (composed schema must be unchanged)
+[aiden-db] wrote prisma/schema.prisma
+warning: in the working copy of 'prisma/schema.prisma', LF will be replaced by CRLF the next time Git touches it
+schema diff lines: 0
+## migrate deploy from empty
+
+migrations/
+  └─ 20260930230755_init/
+    └─ migration.sql
+  └─ 20260930230800_add_deskline_core/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+## migrate status
+
+Database schema is up to date!
+## drift check (migrations vs schema)
+migrate diff exit=0 (0 = no drift)
+## seed run 1
+✓ seeded roles + permissions
+✓ seeded DeskLine: 2 orgs, 7 users, 6 tickets
+{"A_T1":"cdeskline0ticket0a1","A_T_AGENT2":"cdeskline0ticket0a3","A_T_MALICIOUS":"cdeskline0ticket0a4","B_T1":"cdeskline0ticket0b1"}
+## seed run 2 (idempotent)
+✓ seeded roles + permissions
+✓ seeded DeskLine: 2 orgs, 7 users, 6 tickets
+{"A_T1":"cdeskline0ticket0a1","A_T_AGENT2":"cdeskline0ticket0a3","A_T_MALICIOUS":"cdeskline0ticket0a4","B_T1":"cdeskline0ticket0b1"}
+## row counts
+orgs|2
+memberships|7
+tickets|6
+users|7
+ai_usage|0
+audit_logs|0
+## indexes + cascades
+ai_usage_created_at_idx
+ai_usage_org_id_idx
+ai_usage_pkey
+ai_usage_user_id_idx
+memberships_org_id_idx
+memberships_pkey
+memberships_user_id_key
+orgs_pkey
+tickets_org_id_idx
+tickets_org_id_status_idx
+tickets_owner_id_idx
+tickets_pkey
+ai_usage -> orgs CASCADE
+ai_usage -> users CASCADE
+memberships -> orgs CASCADE
+memberships -> users CASCADE
+tickets -> orgs CASCADE
+tickets -> users CASCADE

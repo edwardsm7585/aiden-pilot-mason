@@ -1,0 +1,11 @@
+# Dependency scans 2026-10-01 08:44:16
+## npm audit
+found 0 vulnerabilities
+npm audit exit=0
+## aiden-logging installed copies
+1
+## osv-scanner (osv-scanner version: 2.4.0)
+End status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 150.6049ms elapsed, 150.6049ms wall time
+
+No issues found
+osv exit=0

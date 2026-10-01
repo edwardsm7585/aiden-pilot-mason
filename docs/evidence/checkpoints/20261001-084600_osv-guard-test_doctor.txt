@@ -1,0 +1,23 @@
+aiden doctor
+
+1. aiden.config
+   ✓ C:\Users\edwar\mason-aiden-certificate\aiden.config.ts valid (v2.0.1)
+
+2. Environment variables
+   ✓ all 3 required vars present
+
+3. CVE scan (osv-scanner)
+   ! osv-scanner not on PATH — install with `brew install osv-scanner`
+
+4. npm audit (high/critical only)
+   ✓ clean
+
+5. SDK wiring
+   ✓ <ThemeProvider> mounted in root layout
+
+All checks passed.
+npm notice
+npm notice New major version of npm available! 11.12.1 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

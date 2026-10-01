@@ -19,8 +19,20 @@ DIRTY=$(git status --porcelain)
 HEAD=$(git rev-parse --short HEAD)
 if [ -n "$DIRTY" ]; then TREE="dirty($(printf "%s\n" "$DIRTY" | wc -l | tr -d " "))"; else TREE=clean; fi
 
+# doctor only *warns* when osv-scanner is missing and still exits 0, so the CVE scan
+# could be skipped silently. Find a winget install that this shell's PATH missed.
+if ! command -v osv-scanner >/dev/null 2>&1 && [ -n "${LOCALAPPDATA:-}" ]; then
+  for d in "$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || echo "$LOCALAPPDATA")"/Microsoft/WinGet/Packages/Google.OSVScanner_*; do
+    [ -x "$d/osv-scanner.exe" ] && PATH="$d:$PATH" && break
+  done
+fi
+
 echo "== [$LABEL] aiden doctor"
 $CLI doctor 2>&1 | tee "$DIR/${TS}_${LABEL}_doctor.txt"; DOC=${PIPESTATUS[0]}
+# A skipped CVE scan is a failed doctor, not a pass.
+if [ "$DOC" -eq 0 ] && grep -q "osv-scanner not on PATH" "$DIR/${TS}_${LABEL}_doctor.txt"; then
+  echo "CVE SCAN SKIPPED: osv-scanner not found"; DOC=4
+fi
 
 echo "== [$LABEL] aiden upgrade --dry-run (head $HEAD, tree $TREE)"
 {

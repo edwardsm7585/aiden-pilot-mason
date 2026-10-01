@@ -10,3 +10,7 @@
 - **[2026-09-30]** `aiden upgrade` on Windows → `✗ Could not resolve latest version from registry.` (aiden-cli 2.0.1)
   - **Root cause**: `fetchLatestVersion` calls `spawnSync("npm", …)` without `shell: true`; on Windows `npm` is `npm.cmd`, so spawn fails with ENOENT. `npm view` itself works.
   - **Fix**: Pass the version explicitly: `aiden upgrade --dry-run --target "$(npm view @upstart13-com/aiden-ai version)"` (done in `scripts/checkpoint.sh`). Raise upstream. Raise upstream: the CLI should evaluate the config (e.g. via jiti/tsx) and its schema should match what `aiden init` scaffolds.
+
+- **[2026-10-01]** `aiden doctor` exits 0 when osv-scanner is missing (CVE scan silently skipped)
+  - **Symptom**: doctor prints `! osv-scanner not on PATH` as a warning and still exits 0, so checkpoints read green without a CVE scan (happened when a shell didn't inherit the winget PATH entry).
+  - **Fix**: `scripts/checkpoint.sh` adds a winget `Google.OSVScanner_*` dir to PATH if needed and treats the warning as a red doctor (`doctor=4`). Raise upstream: a missing required scanner should fail doctor.
