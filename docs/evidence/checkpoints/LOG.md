@@ -20,3 +20,4 @@ NOTE | 20260930-173847 phase4a-ticket-routes | upgrade skipped: admin routes wer
 20260930-181749 | phase6a-after-provider-switch | doctor=0 | upgrade-dry-run=2
 20260930-181752 | phase6b-after-audit-sink | doctor=0 | upgrade-dry-run=2
 NOTE | 20260930-181749 phase6a / 181752 phase6b | upgrade skipped: next-env.d.ts flips between next dev and next build; now gitignored, re-runs below
+20260930-181812 | phase6a-after-provider-switch | doctor=0 | upgrade-dry-run=0
