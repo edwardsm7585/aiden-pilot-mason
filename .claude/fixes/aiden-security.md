@@ -17,3 +17,8 @@
 - **[2026-10-01]** Public routes have no request context, so their audit rows lack `requestId`
   - **Symptom**: `auth.signin` rows (emitted inside NextAuth's handler) had `request_id` NULL; only `withAuth` routes open `withRequestContext`.
   - **Fix**: `src/lib/request-context.ts` `withPublicRequestContext()` (same `x-request-id`-or-UUID rule) wraps NextAuth GET/POST and register.
+
+- **[2026-10-01]** Per-IP limit spoofable and per-instance (closed)
+  - **Root cause**: `clientIp` read the leftmost `X-Forwarded-For` entry (client-controlled even behind a proxy; Next only fills the header when absent, with `??=`), and the SDK default store is in memory.
+  - **Fix**: take entry `len - TRUSTED_PROXY_HOPS` (the one the outermost trusted proxy appended); Postgres `RateLimitStore` with SHA-256 keys (`src/lib/rate-limit-store.ts`). Proven with two instances, a restart, and spoofed left-hand entries.
+  - **Note**: `npx shadcn add` can't resolve the `utils` alias when it points at `@upstart13-com/aiden-ui`, and it silently installs an unrelated npm package `cn` and imports from it. Shim `@/lib/utils` → aiden-ui `cn`, add the component, then restore the alias, fix the import and `npm uninstall cn`.

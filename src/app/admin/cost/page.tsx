@@ -114,7 +114,10 @@ export default async function CostPage() {
                   </TableHeader>
                   <TableBody>
                     {byUser.map((u) => (
-                      <TableRow key={u.userId} className="hover:bg-muted/50">
+                      <TableRow
+                        key={u.userId ?? "former-members"}
+                        className="hover:bg-muted/50"
+                      >
                         <TableCell className="font-medium">
                           {u.email ?? "Former member"}
                         </TableCell>

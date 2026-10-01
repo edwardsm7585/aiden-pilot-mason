@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@upstart13-com/aiden-auth/components";
+import { SignInLimitNotice } from "./sign-in-limit-notice";
 
 export const metadata: Metadata = { title: "Sign In" };
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
           Enter your credentials to sign in
         </p>
       </div>
+      <SignInLimitNotice />
       <Suspense>
         <LoginForm />
       </Suspense>

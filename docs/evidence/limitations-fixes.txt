@@ -1,0 +1,100 @@
+# Known-limitation fixes: proof (2026-10-01)
+
+# Known-limitation fixes 2026-10-01 14:04:37 — two production instances (:3000, :3001) on one database
+
+## Rate limits: shared store, persistence, hashed keys, proxy-aware client IP
+| Check | Expected | Got | |
+|---|---|---|---|
+| 10 attempts from one IP split across two instances (6 + 4) reach Auth.js (200 JSON) | 200 200 200 200 200 200 200 200 200 200  | 200 200 200 200 200 200 200 200 200 200  | ok |
+| 11th attempt, on instance B, sees instance A's hits → 429 | 429 | 429 | ok |
+| rate_limit_hits keys are SHA-256 hex only (no emails/IPs) | 0 | 0 | ok |
+| spoofed left entries vary, real right entry fixed: 10 reach Auth.js (200 JSON) | 200 200 200 200 200 200 200 200 200 200  | 200 200 200 200 200 200 200 200 200 200  | ok |
+| 11th spoofed attempt is limited on the real IP → 429 | 429 | 429 | ok |
+| after restarting both instances, the same IP is still limited | 429 | 429 | ok |
+
+## Account deletion keeps AI cost history (anonymised)
+| Check | Expected | Got | |
+|---|---|---|---|
+| agent2 has AI usage before deletion | 1 | 1 | ok |
+| agent2 deletes their account | 204 | 204 | ok |
+| org AI cost rows and total unchanged | 1|0.002229 | 1|0.002229 | ok |
+| the row is kept, user anonymised (user_id NULL) | 1 | 1 | ok |
+| owner's AI cost API: a former-member group, total calls kept | 1|1 | 1|1 | ok |
+
+## ai.usage log line (metadata only)
+{"level":30,"time":1790885107472,"pid":34760,"hostname":"Mason","name":"DeskLine","requestId":"b0ed2b6c-ac24-4aa0-9762-a671d46c7848","userId":"cmupypzk60009mgfb432k28mb","provider":"anthropic","model":"claude-sonnet-4-6","promptTokens":198,"completionTokens":109,"costUSD":0.002229,"latencyMs":3789,"
+log lines containing the draft's prompt text: 0
+
+## Login page: specific rate-limit notice (browser, production)
+| Sign-in attempt | Response | Inline notice | Toasts | |
+|---|---|---|---|---|
+| agent1@acme.test | HTTP 200 | alert: (none) | toast: Invalid email or password | form usable: true |
+| viewer@globex.test | HTTP 429 | alert: Too many sign-in attempts Sign-in is paused to protect your account. Wait about 15 minutes, then sign in again. | toast: (none) | form usable: true |
+| viewer@globex.test after reload | | alert: Too many sign-in attempts Sign-in is paused to protect your account. Wait about 15 minutes, then sign in again. | | |
+page errors: none
+
+## Audit retention job (synthetic rows on aiden_rerun)
+
+```
+# audit retention test 2026-10-01 14:01:17 on aiden_rerun (synthetic rows: 3 x 500 days, 4 x 200 days, 2 x 5 days; all with IP + user agent)
+## dry run
+policy: anonymise after 180 days, archive + delete after 400 days
+rows to anonymise: 7
+rows to archive and delete: 3
+dry run: nothing changed
+rows after dry run: 9
+## apply
+policy: anonymise after 180 days, archive + delete after 400 days
+rows to anonymise: 7
+rows to archive and delete: 3
+anonymised: 7
+archived and deleted: 3
+archive: <scratch>/archive-test/audit-before-2025-08-27-run-2026-10-01T20-01-18-850Z.jsonl
+## result
+mid1|t|t
+mid2|t|t
+mid3|t|t
+mid4|t|t
+new1|f|f
+new2|f|f
+retention_run row: {"piiDays": 180, "anonymised": 7, "archiveFile": "audit-before-2025-08-27-run-2026-10-01T20-01-18-850Z.jsonl", "retentionDays": 400, "archivedAndDeleted": 3}
+## second run (idempotent)
+rows to anonymise: 0
+rows to archive and delete: 0
+anonymised: 0
+archived and deleted: 0
+## bad config
+AUDIT_PII_DAYS can't be longer than AUDIT_RETENTION_DAYS
+exit=1
+```
+
+Archive file contents: ids old1, old2, old3 (the 3 rows past retention; IP and user agent already cleared before archiving).
+
+## Regression on the production build after the fixes
+
+# Regression after limitation fixes — 2026-10-01 14:06:13, production build, fresh database per suite
+
+## smoke + matrix + AI usage (phase4 harness)
+== 7 passed, 0 failed
+ai_usage rows added: 2 (expected 2)
+audit metadata containing ticket text: 0
+== matrix: 37 passed, 0 failed
+
+## F4 sign-in rate limit (fresh DB: empty limiter table)
+== 12 passed, 0 failed
+
+## F3 account deletion
+== 17 passed, 0 failed
+
+## security-guide gaps (spend alert threshold 0.003)
+== 18 passed, 0 failed
+
+## design-system runtime + CSP browser flow
+== 17 passed, 0 failed
+page/console errors: none
+CSP violations during normal use (steps 1-3): none
+page errors: none
+
+server errors in last prod log: 2
+
+(The 2 server-log errors are "The destination stream closed early": a browser cancelling a page stream mid-response during the browser suites, reproduced and documented in .claude/fixes/nextjs.md; not a server fault.)

@@ -15,6 +15,7 @@
     "db:push": "npm run prisma:merge && prisma db push",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
+    "audit:retention": "tsx scripts/audit-retention.ts",
     "clean": "rm -rf .next .turbo dist src/generated"
   },
   "dependencies": {

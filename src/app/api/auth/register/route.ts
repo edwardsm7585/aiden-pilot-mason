@@ -4,13 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/security";
 import { log } from "@/lib/logger";
 import { clientIp } from "@/lib/client-ip";
+import { rateLimitStore } from "@/lib/rate-limit-store";
 import { withPublicRequestContext } from "@/lib/request-context";
 
 /**
  * Self-service registration, rate-limited per IP to blunt account
  * enumeration and signup spam (each register runs bcrypt, a CPU-DoS
- * amplifier). The in-memory store suits single-instance deploys; swap in
- * a shared `RateLimitStore` (Redis/Upstash) for multi-instance setups.
+ * amplifier). Counts live in Postgres (src/lib/rate-limit-store.ts), shared
+ * by every instance.
  *
  * Audit: aiden-auth emits `auth.register` from NextAuth's `createUser`
  * event, which only fires for adapter-created (OAuth) users. Password
@@ -36,6 +37,7 @@ const register = createRegisterHandler({
 export const POST = withPublicRequestContext(
   withRateLimit(register, {
     limit: 5,
+    store: rateLimitStore,
     windowMs: 60_000,
     keyFor: (req) => `register:${clientIp(req)}`,
   })

@@ -126,10 +126,10 @@ Every claim above was re-verified against the current code and live requests, wi
       - The SDK's `withRateLimit` mutates the handler's response headers, and Auth.js's failed-sign-in redirect has immutable headers. Every wrong password became a **500**. Fixed by handing it a mutable copy; recorded for upstream in `.claude/fixes/aiden-security.md`.
       - The auth pages never mounted a `<Toaster />`, so even a plain wrong password showed **no message**. It is now mounted once at the root, per DS 07.
     - Verified on the production server (`f4-signin-rate-limit.txt`): 12/12 checks, plus the real login form in a browser. A wrong password shows its toast; a rate-limited attempt gets a 429, the form stays usable, and there are no page or server errors.
-    - **Residual (upstream):**
-      - A rate-limited user sees the SDK form's generic "Invalid email or password", because `LoginForm` ignores `result.code`.
-      - The per-IP key trusts `X-Forwarded-For`, so deploy behind a proxy that sets it; the per-account limit holds either way.
-      - The in-memory store is per instance; multi-instance deploys need a shared `RateLimitStore`.
+    - **Residuals closed 2026-10-01** (`docs/evidence/limitations-fixes.txt`):
+      - **Specific message:** the login page now shows "Too many sign-in attempts… wait about N minutes". The 429 sets a short-lived cookie holding only a timestamp, and `SignInLimitNotice` composes beside the SDK `LoginForm` and dismisses its generic toast. A native fix is still proposed upstream.
+      - **IP spoofing:** the per-IP key no longer trusts client-supplied entries. It takes the address the outermost trusted proxy appended (`TRUSTED_PROXY_HOPS`, default 1); a spoofed left-hand `X-Forwarded-For` no longer evades the limit.
+      - **Shared store:** limits live in Postgres (`rate_limit_hits`, SHA-256 hashed keys), shared by every instance and kept across restarts. Proven with two instances and a restart.
 - **F5 [MEDIUM] Defence in depth — production CSP allows `script-src 'unsafe-inline'`** (Next's inline bootstrap scripts need it without nonces). There are no XSS sinks in the code, so nothing is exploitable today, but the CSP wouldn't stop an injected inline script. Fix: nonce-based CSP via `proxy.ts` (upstream `securityHeaders` option).
   - **Status:** Resolved. `src/proxy.ts` follows Next 16's CSP guide:
     - A fresh nonce on every request: `script-src 'self' 'nonce-…' 'strict-dynamic'`, with no `'unsafe-inline'`. `'unsafe-eval'` is dev-only.

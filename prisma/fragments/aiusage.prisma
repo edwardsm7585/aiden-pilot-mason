@@ -5,7 +5,8 @@
 model AIUsage {
   id               String   @id @default(cuid())
   orgId            String   @map("org_id")
-  userId           String   @map("user_id")
+  // Nullable: deleting a user keeps the org's cost history, anonymised.
+  userId           String?  @map("user_id")
   requestId        String?  @map("request_id")
   provider         String
   model            String
@@ -16,7 +17,7 @@ model AIUsage {
   createdAt        DateTime @default(now()) @map("created_at")
 
   org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([orgId])
   @@index([userId])

@@ -59,7 +59,7 @@ Change **one line** in `aiden.config.ts`: `ai.active` (line 92). `src/lib/ai.ts`
 
 `AUDIT_SINK=jsonl npm run dev` writes audit events to `.audit/audit.jsonl` (gitignored) instead of the `audit_logs` table. To send them somewhere else, register a sink with `setAuditSink()` in `src/lib/audit.ts`.
 
-Retention and archival are customer-owned (D7). By default, `AuditLog` rows stay in Postgres indefinitely, and no DeskLine code deletes them, including on account deletion and feature rollback. Details and the open owner decision: [`docs/audit-retention.md`](docs/audit-retention.md).
+Retention and archival are customer-owned (D7). DeskLine's policy: keep audit rows for 400 days, clear IP addresses and user agents after 180, then archive to JSONL and delete. Run it with `npm run audit:retention` (add `-- --dry-run` to preview), daily. All three settings are configurable. Nothing else deletes audit rows, including account deletion and feature rollback. Details: [`docs/audit-retention.md`](docs/audit-retention.md).
 
 ## Verify
 
@@ -86,10 +86,34 @@ Retention and archival are customer-owned (D7). By default, `AuditLog` rows stay
 | `docs/evidence/screenshots/`                                                             | UI for every persona, plus Prisma Studio tables and request traces per phase                                                      |
 | `docs/evidence/checkpoints/`                                                             | Every `aiden doctor` and upgrade dry-run, with a note explaining any non-green run                                                |
 
+## Production settings
+
+| Setting                                                       | Default                        | What it does                                                                                                                                                  |
+| ------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TRUSTED_PROXY_HOPS`                                          | `1`                            | How many trusted proxies append to `X-Forwarded-For`. The rate limiter keys on the address your outermost trusted proxy saw, never on client-supplied entries |
+| `RATE_LIMIT_STORE`                                            | `postgres`                     | Sign-in and registration limits are shared by every instance and survive restarts; `memory` is for throwaway single-instance runs                             |
+| `AI_SPEND_ALERT_USD_PER_HOUR`                                 | `1`                            | Raises `ai.spend_alert` (log + audit row) when one user's AI spend in an hour crosses it                                                                      |
+| `AUDIT_RETENTION_DAYS`, `AUDIT_PII_DAYS`, `AUDIT_ARCHIVE_DIR` | `400`, `180`, `.audit/archive` | Audit retention: run `npm run audit:retention` daily ([policy](docs/audit-retention.md))                                                                      |
+| `AUTH_URL` or `AUTH_TRUST_HOST`                               | unset                          | Required by Auth.js in production                                                                                                                             |
+
+## Submission documents
+
+| Document                                                     | What it covers                                                                                  |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| [`docs/plans/deskline.md`](docs/plans/deskline.md)           | Plan (D1–D7, §1–7), pre-UI pre-flight, AI safety, deviations log, verify record, approval       |
+| [`docs/ops-diagnosis.md`](docs/ops-diagnosis.md)             | Upgrade dry-run steps, no-op reasons, recovery runbook, request-context diagnosis, doctor → fix |
+| [`docs/self-assessment.md`](docs/self-assessment.md)         | M12 readiness bars and the rubric self-score                                                    |
+| [`docs/acceptance-matrix.md`](docs/acceptance-matrix.md)     | Every Spec §4 acceptance criterion with evidence                                                |
+| [`docs/audit-retention.md`](docs/audit-retention.md)         | Audit retention, anonymisation and archival policy                                              |
+| [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md) | 18 SDK and starter defects found, with workarounds and proposed fixes                           |
+
+## Reference docs
+
+AIDEN package references (Confluence): [aiden-security](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3082321922/aiden-security) · [aiden-ai](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3082518531/aiden-ai) · [structured output](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3082092577/4.8+Use+structured+output+tool+calls+with+aiden-ai) · [aiden-realtime](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3083108353/aiden-realtime) · [aiden-logging](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3083010049/aiden-logging) · [aiden-db](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3082977281/aiden-db) · [aiden-ui](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3083075585/aiden-ui) · [aiden-auth](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3082518558/aiden-auth) · [aiden-cli](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3081830403/aiden-cli)
+
+Capstone: [project brief](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3137404929/AIDEN+Capstone+Project+Brief+Specification) · [rubric](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3137437697/AIDEN+Certification+Assessment+Rubric+Scoring) · [submission checklist](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3137470465/AIDEN+Capstone+Candidate+Handbook+Submission+Checklist) · [M12 self-assessment](https://upstart13.atlassian.net/wiki/spaces/IP/pages/3102474241/Module+12+Self-Assessment+Resources)
+
 ## Known limitations
 
-- **Generic sign-in message:** when sign-in is rate-limited, the SDK's `LoginForm` still says "Invalid email or password". It ignores the error code and can't be changed without forking the SDK; a fix is proposed upstream.
-- **Rate-limit scope:** the per-address limits trust `X-Forwarded-For`, so deploy behind a proxy that sets it. The limit store is in memory, per instance; use a shared `RateLimitStore` when running several instances.
-- **Account deletion and AI cost:** deleting an account hands its tickets to an org owner, but deletes that person's AI cost rows.
-- **Open decisions:** the audit retention period is the owner's call, and the reviewer's sign-off on the plan (PR #1) is pending.
-- **SDK and starter defects:** 18 found during the build are listed with workarounds and proposed fixes in [`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md).
+- **Plan approval:** the reviewer's sign-off on PR #1 is pending. The plan was merged by the candidate, as the plan's Approval section records.
+- **SDK defects:** 18 SDK and starter defects are worked around locally ([`docs/upstream-sdk-issues.md`](docs/upstream-sdk-issues.md)). Fixing them belongs upstream, for example a native rate-limit message in the SDK's `LoginForm`.

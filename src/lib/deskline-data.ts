@@ -124,7 +124,7 @@ export async function getOrgUsage(member: Member | null) {
     byUser: byUser
       .map((u) => ({
         userId: u.userId,
-        email: emailById.get(u.userId) ?? null,
+        email: u.userId ? (emailById.get(u.userId) ?? null) : null,
         calls: u._count,
         tokens: (u._sum.promptTokens ?? 0) + (u._sum.completionTokens ?? 0),
         costUsd: Number(u._sum.costUsd ?? 0),
@@ -132,7 +132,7 @@ export async function getOrgUsage(member: Member | null) {
       .sort((a, b) => b.costUsd - a.costUsd),
     recent: recent.map((r) => ({
       ...r,
-      email: emailById.get(r.userId) ?? null,
+      email: r.userId ? (emailById.get(r.userId) ?? null) : null,
       costUsd: Number(r.costUsd),
     })),
   };

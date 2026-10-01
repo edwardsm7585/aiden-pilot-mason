@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { withRateLimit } from "@upstart13-com/aiden-security";
 import { handlers } from "@/lib/auth";
 import { clientIp } from "@/lib/client-ip";
+import { rateLimitStore } from "@/lib/rate-limit-store";
 import { withPublicRequestContext } from "@/lib/request-context";
 
 // Both methods run in a request context, so Auth.js audit events
@@ -18,8 +19,8 @@ export const GET = withPublicRequestContext((req: Request) =>
  * - per account: 20 attempts in 15 minutes, against a slow or distributed
  *   attack on one email (high enough that a real user isn't locked out by
  *   a few typos). Successful sign-ins count too.
- * The in-memory store suits single-instance deploys; use a shared
- * `RateLimitStore` (Redis/Upstash) when running several instances.
+ * Counts live in Postgres (src/lib/rate-limit-store.ts), shared by every
+ * instance and kept across restarts.
  */
 const isCredentialsSignIn = (req: Request) =>
   new URL(req.url).pathname.endsWith("/callback/credentials");
@@ -56,11 +57,13 @@ async function authPost(req: Request): Promise<Response> {
 const limited = withRateLimit(
   withRateLimit(authPost, {
     limit: 20,
+    store: rateLimitStore,
     windowMs: 15 * 60_000,
     keyFor: accountKey,
   }),
   {
     limit: 10,
+    store: rateLimitStore,
     windowMs: 60_000,
     keyFor: (req) =>
       isCredentialsSignIn(req) ? `signin:ip:${clientIp(req)}` : null,
@@ -68,6 +71,8 @@ const limited = withRateLimit(
 );
 
 export const POST = withPublicRequestContext(rateLimitedPost);
+
+const SIGNIN_RETRY_COOKIE = "deskline_signin_retry_at";
 
 async function rateLimitedPost(req: Request): Promise<Response> {
   const res = await limited(req, undefined);
@@ -79,6 +84,14 @@ async function rateLimitedPost(req: Request): Promise<Response> {
   url.searchParams.set("code", "rate_limited");
   // Keep Retry-After and X-RateLimit-* from the SDK's 429.
   const headers = new Headers(res.headers);
+  // The SDK LoginForm shows "Invalid email or password" for any error, so
+  // tell the login page when sign-in reopens (SignInLimitNotice reads this).
+  // Only a timestamp; readable by the page on purpose, expires with the lock.
+  const retryAfter = Math.max(1, Number(res.headers.get("retry-after")) || 60);
+  headers.append(
+    "set-cookie",
+    `${SIGNIN_RETRY_COOKIE}=${Date.now() + retryAfter * 1000}; Path=/; Max-Age=${retryAfter}; SameSite=Lax${url.protocol === "https:" ? "; Secure" : ""}`
+  );
   if (req.headers.get("x-auth-return-redirect") === "1") {
     headers.set("content-type", "application/json");
     return new Response(JSON.stringify({ url: url.toString() }), {

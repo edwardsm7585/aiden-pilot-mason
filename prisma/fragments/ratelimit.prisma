@@ -1,0 +1,13 @@
+// Shared sliding-window store for withRateLimit (src/lib/rate-limit-store.ts),
+// so sign-in and registration limits hold across instances and restarts.
+// `key` is a SHA-256 hash: no emails or IP addresses are stored.
+
+model RateLimitHit {
+  id  BigInt   @id @default(autoincrement())
+  key String
+  at  DateTime @default(now())
+
+  @@index([key, at])
+  @@index([at])
+  @@map("rate_limit_hits")
+}

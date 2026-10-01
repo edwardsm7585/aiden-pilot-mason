@@ -21,7 +21,8 @@ datasource db {
 model AIUsage {
   id               String   @id @default(cuid())
   orgId            String   @map("org_id")
-  userId           String   @map("user_id")
+  // Nullable: deleting a user keeps the org's cost history, anonymised.
+  userId           String?  @map("user_id")
   requestId        String?  @map("request_id")
   provider         String
   model            String
@@ -32,7 +33,7 @@ model AIUsage {
   createdAt        DateTime @default(now()) @map("created_at")
 
   org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([orgId])
   @@index([userId])
@@ -72,6 +73,21 @@ model Org {
   aiUsage     AIUsage[]
 
   @@map("orgs")
+}
+
+// ─── prisma\fragments\ratelimit.prisma ───
+// Shared sliding-window store for withRateLimit (src/lib/rate-limit-store.ts),
+// so sign-in and registration limits hold across instances and restarts.
+// `key` is a SHA-256 hash: no emails or IP addresses are stored.
+
+model RateLimitHit {
+  id  BigInt   @id @default(autoincrement())
+  key String
+  at  DateTime @default(now())
+
+  @@index([key, at])
+  @@index([at])
+  @@map("rate_limit_hits")
 }
 
 // ─── prisma\fragments\ticket.prisma ───

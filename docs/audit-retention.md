@@ -25,20 +25,32 @@ Each row stores the event name, who did it (`actor_id`), what it was about (`res
 - **Org owners:** see their own organisation's events at **Audit log** (`/admin/audit`), newest 200. Rows are matched to the org through its members.
 - **Platform admins:** hold the starter's `audit.export` permission, but no export screen or endpoint ships yet. Today an export is a database query.
 
-## How long it is kept (current behaviour)
+## Retention policy
 
-- **Indefinitely.** No DeskLine code updates or deletes an audit row.
-- **Rows outlive what they describe.** They store ids as plain strings with no foreign keys, so deleting a user, ticket or membership leaves its audit history intact. This was checked in the rollback rehearsal and the account-deletion tests.
-- **No archival job.** The table grows until someone acts on it.
+| What                                   | Default                                                                                                                                                                 | Setting                                                     |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Audit rows kept in Postgres            | **400 days**: more than the 12-month window SOC 2 evidence typically covers, with a buffer                                                                              | `AUDIT_RETENTION_DAYS`                                      |
+| Client IP and user agent on audit rows | Cleared after **180 days**: GDPR storage limitation, while still covering security investigations                                                                       | `AUDIT_PII_DAYS`                                            |
+| Rows past retention                    | **Archived, then deleted**: appended to a JSONL file and flushed to disk _before_ deletion, batch by batch, so a crash can duplicate archive lines but never lose a row | `AUDIT_ARCHIVE_DIR` (default `.audit/archive/`, gitignored) |
 
-Related: AI cost rows (`ai_usage`) are deleted with the user they belong to, so an org's cost totals drop when a member deletes their account. The audit rows for those calls remain.
+The defaults are a reasoned starting point. Change them through the settings above, without code changes, if contracts or regulations require something else. `AUDIT_PII_DAYS` may not be longer than `AUDIT_RETENTION_DAYS`; the job refuses that configuration.
 
-## Decision needed (owner)
+### Running it
 
-Set and record:
+```bash
+npm run audit:retention -- --dry-run   # report what would change
+npm run audit:retention                # apply
+```
 
-1. **Retention period** for `audit_logs` (for example, 1 year in Postgres). Base it on contracts and regulations, such as SOC 2 evidence windows and GDPR storage limitation.
-2. **Archival target and method.** For example, a `setAuditSink` that also writes to object storage or a warehouse, or a scheduled export followed by a delete of rows past the retention period.
-3. **Personal data:** the IP address, user agent and actor id are personal data. Decide whether they are kept for the full period or anonymised earlier.
+- **Schedule:** run it daily (cron, a platform scheduler, or a CI job with database access). It is idempotent: a second run the same day changes nothing.
+- **Order:** IP addresses and user agents are cleared first, so archive files never contain them.
+- **Record:** each run writes an `audit.retention_run` audit row with its counts and the archive file name.
+- **Archive storage:** ship the files to cold storage (object storage or a warehouse) on whatever schedule your backups use. Alternatively, register a second sink with `setAuditSink()` in `src/lib/audit.ts` so every event is copied there as it happens.
 
-Until those are decided, the policy is: **keep everything, archive nothing, delete nothing.**
+Tested on synthetic rows (3 at 500 days, 4 at 200 days, 2 at 5 days): 7 anonymised, 3 archived and deleted, recent rows untouched, a second run changed nothing, and an invalid configuration was refused (`docs/evidence/limitations-fixes.txt`).
+
+## What is never deleted early
+
+- Nothing else in DeskLine updates or deletes audit rows.
+- Rows store ids as plain strings with no foreign keys, so deleting a user, ticket or membership leaves its audit history intact. This was checked in the rollback rehearsal and the account-deletion tests.
+- AI cost rows (`ai_usage`) also outlive their user: when an account is deleted, its rows stay with `user_id` set to null, so an org's cost totals don't change.

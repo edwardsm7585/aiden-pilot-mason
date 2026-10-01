@@ -37,6 +37,17 @@ setAIUsageSink(async (record) => {
         latencyMs: Math.round(record.latencyMs),
       },
     });
+    // Cost telemetry in the log stream too: usage metadata only, never the
+    // prompt or the output (requestId/userId come from the request context).
+    const usage = {
+      provider: record.provider,
+      model: record.model,
+      promptTokens: record.promptTokens,
+      completionTokens: record.completionTokens,
+      costUSD: record.costUSD,
+      latencyMs: Math.round(record.latencyMs),
+    };
+    log.info(usage, "ai.usage");
     await alertOnSpendSpike(record.userId, record.costUSD);
   } catch (err) {
     log.error({ err, requestId: record.requestId }, "ai.usage write failed");

@@ -17,7 +17,7 @@ They are ordered by impact; security-relevant ones come first.
 
 - **Symptom:** no limit on `POST /api/auth/callback/credentials` by default, which allows password guessing. Once an app adds a limit, the SDK `LoginForm` still toasts "Invalid email or password" for _every_ failure, so a rate-limited user is told their correct password is wrong.
 - **Cause:** `LoginForm` takes no props and does `if (result?.error) toast.error("Invalid email or password")`, ignoring `result.code`. `withRateLimit`'s default 429 body (`{ error }`) has no `url`, so `signIn()` throws on `new URL(data.url)` and the form stays on its spinner.
-- **Workaround:** the NextAuth route rate-limits per IP and per account, and answers 429 in Auth.js's shape (`{ url: "/login?error=RateLimited&code=rate_limited" }`). The message stays generic; there is no non-fork fix.
+- **Workaround:** the NextAuth route rate-limits per IP and per account, and answers 429 in Auth.js's shape (`{ url: "/login?error=RateLimited&code=rate_limited" }`). It also sets a short-lived cookie that a small component beside `LoginForm` reads, to show a specific notice and dismiss the generic toast. The SDK form isn't forked, but the app now carries glue it shouldn't need.
 - **Proposed fix:**
   - `createAuth({ rateLimit: { perIp, perAccount } })`, applied inside the SDK's handlers.
   - `onLimit` receives the request, so apps can answer in their framework's shape.
