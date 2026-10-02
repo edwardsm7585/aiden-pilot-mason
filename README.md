@@ -5,7 +5,7 @@ Scaffolded with `npx @upstart13-com/aiden-cli init aiden-pilot-mason` (first com
 
 DeskLine is a multi-tenant support desk built on the AIDEN SDK (`@upstart13-com/aiden-*` 2.0.1) for the AIDEN Certified — Associate capstone. Agents log customer tickets, AI triages each one (priority, category, sentiment), and agents stream an AI draft reply. Owners manage member roles and see their organisation's audit log and AI cost. Every organisation's data is isolated from every other.
 
-The approved plan, decisions D1–D7 and all 30 recorded deviations are in [`docs/plans/deskline.md`](docs/plans/deskline.md).
+The approved plan, decisions D1–D7 and all 34 recorded deviations are in [`docs/plans/deskline.md`](docs/plans/deskline.md).
 
 ## Run
 
